@@ -1,7 +1,4 @@
-import { HydycoServer } from "@hydyco/core";
-import MongoosePlugin from "./plugin";
-const server = new HydycoServer();
+import HydycoModel from "./model";
+import HydycoMongoose from "./plugin";
 
-server.registerPlugins([MongoosePlugin]);
-
-server.start();
+export { HydycoModel, HydycoMongoose };

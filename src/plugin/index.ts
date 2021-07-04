@@ -1,10 +1,10 @@
-import { App, Request, Response } from "@tinyhttp/app";
+import { Router, Request, Response } from "express";
 import { HydycoFile, HydycoParser } from "@hydyco/core";
 import { Schema } from "mongoose";
 import Parser from "../parser";
 import Model from "../model";
 
-const app = new App();
+const app = Router();
 const model = new Model();
 const file = new HydycoFile();
 const parser = new HydycoParser();

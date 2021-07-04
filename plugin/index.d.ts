@@ -1,6 +1,5 @@
-import { App, Request, Response } from "@tinyhttp/app";
 import { Schema } from "mongoose";
-declare const app: App<any, Request, Response<any>>;
+declare const app: import("express-serve-static-core").Router;
 declare enum EOperations {
     list = "list",
     create = "create",

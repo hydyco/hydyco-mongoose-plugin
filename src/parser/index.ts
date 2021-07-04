@@ -16,7 +16,7 @@ export default class HydycoModel {
     if (!fileName) throw new Error("Model name is required");
     if (this._singleton) throw new Error("Class is already initialized");
     this._singleton = true;
-    this._fileName = fileName.split(".")[0];
+    this._fileName = this._file.getFileName(fileName);
     this._schema = this.mongooseSchema();
   }
 

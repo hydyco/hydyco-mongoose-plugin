@@ -162,53 +162,70 @@ export default class ExpressRoutes {
     request: MongooseRequest;
     response: Response;
   } {
-    console.log("after");
+    console.log(`before :: ${request.path} :: ${request.methodCall}`);
     return { res, request, response };
   }
 
   private _init() {
-    this._router.use(this.before); // call before middleware
     this._router.get(
       this.restApiPaths.list,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.list;
-        return this.list(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.list(request, response)
     );
     this._router.post(
       this.restApiPaths.create,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.create;
-        return this.create(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.create(request, response)
     );
     this._router.get(
       this.restApiPaths.read,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.read;
-        return this.read(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.read(request, response)
     );
     this._router.put(
       this.restApiPaths.update,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.update;
-        return this.update(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.update(request, response)
     );
     this._router.delete(
       this.restApiPaths.delete,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.delete;
-        return this.delete(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.delete(request, response)
     );
     this._router.delete(
       this.restApiPaths.deleteAll,
-      (request: MongooseRequest, response: Response) => {
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.deleteAll;
-        return this.deleteAll(request, response);
-      }
+        next();
+      },
+      this.before,
+      (request: MongooseRequest, response: Response) =>
+        this.deleteAll(request, response)
     );
     return this._router;
   }

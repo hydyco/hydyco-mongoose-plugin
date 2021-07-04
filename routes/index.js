@@ -220,34 +220,45 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {Response} - Express Response object
      */
     ExpressRoutes.prototype.after = function (res, request, response) {
-        console.log("after");
+        console.log("before :: " + request.path + " :: " + request.methodCall);
         return { res: res, request: request, response: response };
     };
     ExpressRoutes.prototype._init = function () {
         var _this = this;
-        this._router.use(this.before); // call before middleware
-        this._router.get(this.restApiPaths.list, function (request, response) {
+        this._router.get(this.restApiPaths.list, function (request, response, next) {
             request.methodCall = ERestApiMethods.list;
+            next();
+        }, this.before, function (request, response) {
             return _this.list(request, response);
         });
-        this._router.post(this.restApiPaths.create, function (request, response) {
+        this._router.post(this.restApiPaths.create, function (request, response, next) {
             request.methodCall = ERestApiMethods.create;
+            next();
+        }, this.before, function (request, response) {
             return _this.create(request, response);
         });
-        this._router.get(this.restApiPaths.read, function (request, response) {
+        this._router.get(this.restApiPaths.read, function (request, response, next) {
             request.methodCall = ERestApiMethods.read;
+            next();
+        }, this.before, function (request, response) {
             return _this.read(request, response);
         });
-        this._router.put(this.restApiPaths.update, function (request, response) {
+        this._router.put(this.restApiPaths.update, function (request, response, next) {
             request.methodCall = ERestApiMethods.update;
+            next();
+        }, this.before, function (request, response) {
             return _this.update(request, response);
         });
-        this._router.delete(this.restApiPaths.delete, function (request, response) {
+        this._router.delete(this.restApiPaths.delete, function (request, response, next) {
             request.methodCall = ERestApiMethods.delete;
+            next();
+        }, this.before, function (request, response) {
             return _this.delete(request, response);
         });
-        this._router.delete(this.restApiPaths.deleteAll, function (request, response) {
+        this._router.delete(this.restApiPaths.deleteAll, function (request, response, next) {
             request.methodCall = ERestApiMethods.deleteAll;
+            next();
+        }, this.before, function (request, response) {
             return _this.deleteAll(request, response);
         });
         return this._router;

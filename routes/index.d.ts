@@ -17,7 +17,7 @@ interface IRestApiPaths {
 export default class ExpressRoutes {
     private modelName;
     private _parser;
-    private _router;
+    _router: import("express-serve-static-core").Router;
     restApiPaths: IRestApiPaths;
     constructor(modelName: string, restApiPaths?: IRestApiPaths);
     /**

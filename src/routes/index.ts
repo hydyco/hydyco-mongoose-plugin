@@ -28,7 +28,7 @@ enum ERestApiMethods {
 
 export default class ExpressRoutes {
   private _parser: Parser;
-  private _router = Router();
+  public _router = Router();
   public restApiPaths: IRestApiPaths;
 
   constructor(private modelName: string, restApiPaths?: IRestApiPaths) {

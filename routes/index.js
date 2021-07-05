@@ -56,6 +56,7 @@ var ExpressRoutes = /** @class */ (function () {
         this.modelName = modelName;
         this._router = express_1.Router();
         this._parser = new parser_1.default(modelName);
+        this.mongooseModel = this._parser.mongooseModel;
         var defaultPath = "/" + modelName.toLowerCase();
         this.restApiPaths = restApiPaths
             ? restApiPaths

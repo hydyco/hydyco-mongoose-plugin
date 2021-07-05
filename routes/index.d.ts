@@ -19,6 +19,7 @@ export default class ExpressRoutes {
     private _parser;
     _router: import("express-serve-static-core").Router;
     restApiPaths: IRestApiPaths;
+    mongooseModel: any;
     constructor(modelName: string, restApiPaths?: IRestApiPaths);
     /**
      * Get all registered express routes

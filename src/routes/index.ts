@@ -2,6 +2,7 @@
  * Extending Express Class
  */
 import { Router, Request, Response, NextFunction } from "express";
+import { Model, Document } from "mongoose";
 import Parser from "../parser";
 
 type MongooseRequest = Request & { methodCall?: string };
@@ -30,9 +31,11 @@ export default class ExpressRoutes {
   private _parser: Parser;
   public _router = Router();
   public restApiPaths: IRestApiPaths;
+  public mongooseModel: any;
 
   constructor(private modelName: string, restApiPaths?: IRestApiPaths) {
     this._parser = new Parser(modelName);
+    this.mongooseModel = this._parser.mongooseModel;
     const defaultPath = `/${modelName.toLowerCase()}`;
     this.restApiPaths = restApiPaths
       ? restApiPaths

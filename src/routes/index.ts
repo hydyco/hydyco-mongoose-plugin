@@ -29,13 +29,11 @@ enum ERestApiMethods {
 
 export default class ExpressRoutes {
   private _parser: Parser;
-  public _router = Router();
+  private _router = Router();
   public restApiPaths: IRestApiPaths;
-  public mongooseModel: any;
 
   constructor(private modelName: string, restApiPaths?: IRestApiPaths) {
     this._parser = new Parser(modelName);
-    this.mongooseModel = this._parser.mongooseModel;
     const defaultPath = `/${modelName.toLowerCase()}`;
     this.restApiPaths = restApiPaths
       ? restApiPaths
@@ -57,6 +55,11 @@ export default class ExpressRoutes {
   get Routes(): Router {
     return this._init();
   }
+
+  /**
+   * Custom Routes
+   */
+  public customRoutes(router: Router, defaultPath: string) {} // todo : add options for custom routes
 
   /**
    * Get all mongoose model data
@@ -170,6 +173,7 @@ export default class ExpressRoutes {
   }
 
   private _init() {
+    this.customRoutes(this._router, this.restApiPaths.default);
     this._router.get(
       this.restApiPaths.list,
       (request: MongooseRequest, response: Response, next: NextFunction) => {

@@ -56,7 +56,6 @@ var ExpressRoutes = /** @class */ (function () {
         this.modelName = modelName;
         this._router = express_1.Router();
         this._parser = new parser_1.default(modelName);
-        this.mongooseModel = this._parser.mongooseModel;
         var defaultPath = "/" + modelName.toLowerCase();
         this.restApiPaths = restApiPaths
             ? restApiPaths
@@ -81,6 +80,10 @@ var ExpressRoutes = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    /**
+     * Custom Routes
+     */
+    ExpressRoutes.prototype.customRoutes = function (router, defaultPath) { }; // todo : add options for custom routes
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
@@ -226,6 +229,7 @@ var ExpressRoutes = /** @class */ (function () {
     };
     ExpressRoutes.prototype._init = function () {
         var _this = this;
+        this.customRoutes(this._router, this.restApiPaths.default);
         this._router.get(this.restApiPaths.list, function (request, response, next) {
             request.methodCall = ERestApiMethods.list;
             next();

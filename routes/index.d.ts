@@ -17,15 +17,18 @@ interface IRestApiPaths {
 export default class ExpressRoutes {
     private modelName;
     private _parser;
-    _router: import("express-serve-static-core").Router;
+    private _router;
     restApiPaths: IRestApiPaths;
-    mongooseModel: any;
     constructor(modelName: string, restApiPaths?: IRestApiPaths);
     /**
      * Get all registered express routes
      * @return {Router} - Express Router Object
      */
     get Routes(): Router;
+    /**
+     * Custom Routes
+     */
+    customRoutes(router: Router, defaultPath: string): void;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object

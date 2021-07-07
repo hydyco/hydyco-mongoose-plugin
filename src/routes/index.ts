@@ -8,7 +8,6 @@ import Parser from "../parser";
 type MongooseRequest = Request & { methodCall?: string };
 
 interface IRestApiPaths {
-  default: string;
   list: string;
   create: string;
   read: string;
@@ -28,38 +27,47 @@ enum ERestApiMethods {
 }
 
 export default class ExpressRoutes {
-  private _parser: Parser;
+  private _model: Model<Document<any, any>, {}, {}>;
   private _router = Router();
-  public restApiPaths: IRestApiPaths;
+  private _defaultPath: string;
 
-  constructor(private modelName: string, restApiPaths?: IRestApiPaths) {
-    this._parser = new Parser(modelName);
-    const defaultPath = `/${modelName.toLowerCase()}`;
-    this.restApiPaths = restApiPaths
-      ? restApiPaths
-      : {
-          default: defaultPath,
-          list: `${defaultPath}`,
-          create: `${defaultPath}`,
-          read: `${defaultPath}/:id`,
-          update: `${defaultPath}/:id`,
-          delete: `${defaultPath}/:id`,
-          deleteAll: `${defaultPath}`,
-        };
+  constructor(private modelName: string) {
+    this._model = new Parser(modelName).mongooseModel();
+    this._defaultPath = `/${modelName.toLowerCase()}`;
   }
 
   /**
    * Get all registered express routes
    * @return {Router} - Express Router Object
    */
-  get Routes(): Router {
-    return this._init();
+  public Routes(): Router {
+    return this._boot();
+  }
+
+  /**
+   * Get all route paths for the model
+   */
+  public curdPaths(): IRestApiPaths {
+    return {
+      list: `${this._defaultPath}`,
+      create: `${this._defaultPath}`,
+      read: `${this._defaultPath}/:id`,
+      update: `${this._defaultPath}/:id`,
+      delete: `${this._defaultPath}/:id`,
+      deleteAll: `${this._defaultPath}`,
+    };
   }
 
   /**
    * Custom Routes
    */
-  public customRoutes(router: Router, defaultPath: string) {} // todo : add options for custom routes
+  public customRoutes(
+    router: Router,
+    defaultPath: string,
+    model: Model<Document<any, any>, {}, {}>
+  ): Router {
+    return router;
+  } // todo : add options for custom routes
 
   /**
    * Get all mongoose model data
@@ -68,9 +76,8 @@ export default class ExpressRoutes {
    */
 
   public async list(request: MongooseRequest, response: Response) {
-    const res = await this._parser.mongooseModel().find({});
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res = await this._model.find({});
+    this.after(res, request, response);
   }
 
   /**
@@ -81,9 +88,8 @@ export default class ExpressRoutes {
 
   public async create(request: MongooseRequest, response: Response) {
     const { body } = request;
-    const res = await this._parser.mongooseModel().create(body);
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res = await this._model.create(body);
+    this.after(res, request, response);
   }
 
   /**
@@ -95,9 +101,8 @@ export default class ExpressRoutes {
   public async read(request: MongooseRequest, response: Response) {
     const { params } = request;
     const { id } = params;
-    const res = await this._parser.mongooseModel().findById(id);
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res = await this._model.findById(id);
+    this.after(res, request, response);
   }
 
   /**
@@ -109,9 +114,8 @@ export default class ExpressRoutes {
   public async update(request: MongooseRequest, response: Response) {
     const { body, params } = request;
     const { id } = params;
-    const res = await this._parser.mongooseModel().findByIdAndUpdate(id, body);
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res = await this._model.findByIdAndUpdate(id, body);
+    this.after(res, request, response);
   }
 
   /**
@@ -123,9 +127,8 @@ export default class ExpressRoutes {
   public async delete(request: MongooseRequest, response: Response) {
     const { params } = request;
     const { id } = params;
-    const res: any = await this._parser.mongooseModel().findByIdAndDelete(id);
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res: any = await this._model.findByIdAndDelete(id);
+    this.after(res, request, response);
   }
 
   /**
@@ -135,9 +138,8 @@ export default class ExpressRoutes {
    */
 
   public async deleteAll(request: MongooseRequest, response: Response) {
-    const res = await this._parser.mongooseModel().remove({});
-    const returnResponse = this.after(res, request, response);
-    return response.send(returnResponse.res);
+    const res = await this._model.remove({});
+    this.after(res, request, response);
   }
 
   /**
@@ -150,7 +152,6 @@ export default class ExpressRoutes {
     response: Response,
     next: NextFunction
   ) {
-    console.log("before");
     next();
   }
 
@@ -159,23 +160,23 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-  public after(
-    res: any,
-    request: MongooseRequest,
-    response: Response
-  ): {
-    res: any;
-    request: MongooseRequest;
-    response: Response;
-  } {
-    console.log(`before :: ${request.path} :: ${request.methodCall}`);
-    return { res, request, response };
+  public after(res: any, request: MongooseRequest, response: Response) {
+    return response.send(res);
   }
 
-  private _init() {
-    this.customRoutes(this._router, this.restApiPaths.default);
+  private _boot() {
+    this._router = this.customRoutes(
+      this._router,
+      this._defaultPath,
+      this._model
+    );
+
+    if (!this._router) {
+      throw new Error("Custom Routes should always return Router object");
+    }
+
     this._router.get(
-      this.restApiPaths.list,
+      this.curdPaths().list,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.list;
         next();
@@ -185,7 +186,7 @@ export default class ExpressRoutes {
         this.list(request, response)
     );
     this._router.post(
-      this.restApiPaths.create,
+      this.curdPaths().create,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.create;
         next();
@@ -195,7 +196,7 @@ export default class ExpressRoutes {
         this.create(request, response)
     );
     this._router.get(
-      this.restApiPaths.read,
+      this.curdPaths().read,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.read;
         next();
@@ -205,7 +206,7 @@ export default class ExpressRoutes {
         this.read(request, response)
     );
     this._router.put(
-      this.restApiPaths.update,
+      this.curdPaths().update,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.update;
         next();
@@ -215,7 +216,7 @@ export default class ExpressRoutes {
         this.update(request, response)
     );
     this._router.delete(
-      this.restApiPaths.delete,
+      this.curdPaths().delete,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.delete;
         next();
@@ -225,7 +226,7 @@ export default class ExpressRoutes {
         this.delete(request, response)
     );
     this._router.delete(
-      this.restApiPaths.deleteAll,
+      this.curdPaths().deleteAll,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
         request.methodCall = ERestApiMethods.deleteAll;
         next();

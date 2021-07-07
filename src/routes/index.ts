@@ -73,10 +73,15 @@ export default class ExpressRoutes {
    * Get all mongoose model data
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
+   * @param {model} - Current Mongoose Model
    */
 
-  public async list(request: MongooseRequest, response: Response) {
-    const res = await this._model.find({});
+  public async list(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
+    const res = await model.find({});
     this.after(res, request, response);
   }
 
@@ -86,9 +91,13 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    */
 
-  public async create(request: MongooseRequest, response: Response) {
+  public async create(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
     const { body } = request;
-    const res = await this._model.create(body);
+    const res = await model.create(body);
     this.after(res, request, response);
   }
 
@@ -98,10 +107,14 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    */
 
-  public async read(request: MongooseRequest, response: Response) {
+  public async read(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
     const { params } = request;
     const { id } = params;
-    const res = await this._model.findById(id);
+    const res = await model.findById(id);
     this.after(res, request, response);
   }
 
@@ -111,10 +124,14 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    */
 
-  public async update(request: MongooseRequest, response: Response) {
+  public async update(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
     const { body, params } = request;
     const { id } = params;
-    const res = await this._model.findByIdAndUpdate(id, body);
+    const res = await model.findByIdAndUpdate(id, body);
     this.after(res, request, response);
   }
 
@@ -124,10 +141,14 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    */
 
-  public async delete(request: MongooseRequest, response: Response) {
+  public async delete(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
     const { params } = request;
     const { id } = params;
-    const res: any = await this._model.findByIdAndDelete(id);
+    const res: any = await model.findByIdAndDelete(id);
     this.after(res, request, response);
   }
 
@@ -137,8 +158,12 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    */
 
-  public async deleteAll(request: MongooseRequest, response: Response) {
-    const res = await this._model.remove({});
+  public async deleteAll(
+    request: MongooseRequest,
+    response: Response,
+    model: Model<Document<any, any>, {}, {}>
+  ) {
+    const res = await model.remove({});
     this.after(res, request, response);
   }
 
@@ -183,7 +208,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.list(request, response)
+        this.list(request, response, this._model)
     );
     this._router.post(
       this.curdPaths().create,
@@ -193,7 +218,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.create(request, response)
+        this.create(request, response, this._model)
     );
     this._router.get(
       this.curdPaths().read,
@@ -203,7 +228,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.read(request, response)
+        this.read(request, response, this._model)
     );
     this._router.put(
       this.curdPaths().update,
@@ -213,7 +238,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.update(request, response)
+        this.update(request, response, this._model)
     );
     this._router.delete(
       this.curdPaths().delete,
@@ -223,7 +248,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.delete(request, response)
+        this.delete(request, response, this._model)
     );
     this._router.delete(
       this.curdPaths().deleteAll,
@@ -233,7 +258,7 @@ export default class ExpressRoutes {
       },
       this.before,
       (request: MongooseRequest, response: Response) =>
-        this.deleteAll(request, response)
+        this.deleteAll(request, response, this._model)
     );
     return this._router;
   }

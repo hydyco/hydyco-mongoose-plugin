@@ -88,13 +88,14 @@ var ExpressRoutes = /** @class */ (function () {
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
+     * @param {model} - Current Mongoose Model
      */
-    ExpressRoutes.prototype.list = function (request, response) {
+    ExpressRoutes.prototype.list = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this._model.find({})];
+                    case 0: return [4 /*yield*/, model.find({})];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -108,14 +109,14 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.create = function (request, response) {
+    ExpressRoutes.prototype.create = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var body, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         body = request.body;
-                        return [4 /*yield*/, this._model.create(body)];
+                        return [4 /*yield*/, model.create(body)];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -129,7 +130,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.read = function (request, response) {
+    ExpressRoutes.prototype.read = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var params, id, res;
             return __generator(this, function (_a) {
@@ -137,7 +138,7 @@ var ExpressRoutes = /** @class */ (function () {
                     case 0:
                         params = request.params;
                         id = params.id;
-                        return [4 /*yield*/, this._model.findById(id)];
+                        return [4 /*yield*/, model.findById(id)];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -151,7 +152,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.update = function (request, response) {
+    ExpressRoutes.prototype.update = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var body, params, id, res;
             return __generator(this, function (_a) {
@@ -159,7 +160,7 @@ var ExpressRoutes = /** @class */ (function () {
                     case 0:
                         body = request.body, params = request.params;
                         id = params.id;
-                        return [4 /*yield*/, this._model.findByIdAndUpdate(id, body)];
+                        return [4 /*yield*/, model.findByIdAndUpdate(id, body)];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -173,7 +174,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.delete = function (request, response) {
+    ExpressRoutes.prototype.delete = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var params, id, res;
             return __generator(this, function (_a) {
@@ -181,7 +182,7 @@ var ExpressRoutes = /** @class */ (function () {
                     case 0:
                         params = request.params;
                         id = params.id;
-                        return [4 /*yield*/, this._model.findByIdAndDelete(id)];
+                        return [4 /*yield*/, model.findByIdAndDelete(id)];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -195,12 +196,12 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.deleteAll = function (request, response) {
+    ExpressRoutes.prototype.deleteAll = function (request, response, model) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this._model.remove({})];
+                    case 0: return [4 /*yield*/, model.remove({})];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -235,37 +236,37 @@ var ExpressRoutes = /** @class */ (function () {
             request.methodCall = ERestApiMethods.list;
             next();
         }, this.before, function (request, response) {
-            return _this.list(request, response);
+            return _this.list(request, response, _this._model);
         });
         this._router.post(this.curdPaths().create, function (request, response, next) {
             request.methodCall = ERestApiMethods.create;
             next();
         }, this.before, function (request, response) {
-            return _this.create(request, response);
+            return _this.create(request, response, _this._model);
         });
         this._router.get(this.curdPaths().read, function (request, response, next) {
             request.methodCall = ERestApiMethods.read;
             next();
         }, this.before, function (request, response) {
-            return _this.read(request, response);
+            return _this.read(request, response, _this._model);
         });
         this._router.put(this.curdPaths().update, function (request, response, next) {
             request.methodCall = ERestApiMethods.update;
             next();
         }, this.before, function (request, response) {
-            return _this.update(request, response);
+            return _this.update(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().delete, function (request, response, next) {
             request.methodCall = ERestApiMethods.delete;
             next();
         }, this.before, function (request, response) {
-            return _this.delete(request, response);
+            return _this.delete(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
             request.methodCall = ERestApiMethods.deleteAll;
             next();
         }, this.before, function (request, response) {
-            return _this.deleteAll(request, response);
+            return _this.deleteAll(request, response, _this._model);
         });
         return this._router;
     };

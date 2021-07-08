@@ -1,4 +1,5 @@
 import HydycoModel from "./parser";
 import HydycoMongoose from "./plugin";
 import MongooseExpress from "./routes";
-export { HydycoModel, HydycoMongoose, MongooseExpress };
+declare const MongooseExpressRoutes: Array<any>;
+export { HydycoModel, HydycoMongoose, MongooseExpress, MongooseExpressRoutes };

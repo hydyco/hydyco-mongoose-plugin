@@ -230,15 +230,15 @@ var ExpressRoutes = /** @class */ (function () {
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
     ExpressRoutes.prototype.before = function (request, response) {
-        return { request: request, response: response };
+        return [request, response];
     };
     /**
      * before middleware middleware to handle before function
      */
     ExpressRoutes.prototype.beforeMiddleware = function (request, response, next) {
-        var bf = this.before(request, response);
-        request = bf.request;
-        response = bf.response;
+        var _a = this.before(request, response), req = _a[0], res = _a[1];
+        request = req;
+        response = res;
         next();
     };
     /**

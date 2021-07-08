@@ -200,8 +200,8 @@ export default class ExpressRoutes {
   public before(
     request: MongooseRequest,
     response: Response
-  ): { request: MongooseRequest; response: Response } {
-    return { request, response };
+  ): [request: MongooseRequest, response: Response] {
+    return [request, response];
   }
 
   /**
@@ -212,9 +212,9 @@ export default class ExpressRoutes {
     response: Response,
     next: NextFunction
   ) {
-    const bf = this.before(request, response);
-    request = bf.request;
-    response = bf.response;
+    const [req, res] = this.before(request, response);
+    request = req;
+    response = res;
     next();
   }
 

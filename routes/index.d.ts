@@ -89,10 +89,7 @@ export default class ExpressRoutes {
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    before(request: MongooseRequest, response: Response): {
-        request: MongooseRequest;
-        response: Response;
-    };
+    before(request: MongooseRequest, response: Response): [request: MongooseRequest, response: Response];
     /**
      * before middleware middleware to handle before function
      */

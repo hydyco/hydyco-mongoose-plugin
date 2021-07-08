@@ -80,10 +80,23 @@ var ExpressRoutes = /** @class */ (function () {
     };
     /**
      * Custom Routes
+     * @param {Router} - Express Router object
+     * @param {string} - default path string
+     * @param {Model} - mongoose model
      */
     ExpressRoutes.prototype.customRoutes = function (router, defaultPath, model) {
         return router;
     }; // todo : add options for custom routes
+    ExpressRoutes.prototype.middleware = function () {
+        return {
+            list: [],
+            create: [],
+            read: [],
+            update: [],
+            delete: [],
+            deleteAll: [],
+        };
+    };
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
@@ -214,8 +227,25 @@ var ExpressRoutes = /** @class */ (function () {
      * Gets called before every api call
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
+     * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    ExpressRoutes.prototype.before = function (request, response, next) {
+    ExpressRoutes.prototype.before = function (request, response) {
+        return { request: request, response: response };
+    };
+    /**
+     * before middleware middleware to handle before function
+     */
+    ExpressRoutes.prototype.beforeMiddleware = function (request, response, next) {
+        var bf = this.before(request, response);
+        request = bf.request;
+        response = bf.response;
+        next();
+    };
+    /**
+     * Method Call Middleware
+     */
+    ExpressRoutes.prototype.methodCallMiddleware = function (request, response, next, call) {
+        request.methodCall = call;
         next();
     };
     /**
@@ -233,39 +263,33 @@ var ExpressRoutes = /** @class */ (function () {
             throw new Error("Custom Routes should always return Router object");
         }
         this._router.get(this.curdPaths().list, function (request, response, next) {
-            request.methodCall = ERestApiMethods.list;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.list);
+        }, this.beforeMiddleware, this.middleware().list, function (request, response) {
             return _this.list(request, response, _this._model);
         });
         this._router.post(this.curdPaths().create, function (request, response, next) {
-            request.methodCall = ERestApiMethods.create;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.create);
+        }, this.beforeMiddleware, this.middleware().create, function (request, response) {
             return _this.create(request, response, _this._model);
         });
         this._router.get(this.curdPaths().read, function (request, response, next) {
-            request.methodCall = ERestApiMethods.read;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.read);
+        }, this.beforeMiddleware, this.middleware().read, function (request, response) {
             return _this.read(request, response, _this._model);
         });
         this._router.put(this.curdPaths().update, function (request, response, next) {
-            request.methodCall = ERestApiMethods.update;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.update);
+        }, this.beforeMiddleware, this.middleware().update, function (request, response) {
             return _this.update(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().delete, function (request, response, next) {
-            request.methodCall = ERestApiMethods.delete;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.delete);
+        }, this.beforeMiddleware, this.middleware().delete, function (request, response) {
             return _this.delete(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
-            request.methodCall = ERestApiMethods.deleteAll;
-            next();
-        }, this.before, function (request, response) {
+            _this.methodCallMiddleware(request, response, next, ERestApiMethods.deleteAll);
+        }, this.beforeMiddleware, this.middleware().deleteAll, function (request, response) {
             return _this.deleteAll(request, response, _this._model);
         });
         return this._router;

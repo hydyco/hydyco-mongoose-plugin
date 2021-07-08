@@ -1,7 +1,7 @@
 /**
  * Extending Express Class
  */
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { Model, Document } from "mongoose";
 declare type MongooseRequest = Request & {
     methodCall?: string;
@@ -13,6 +13,15 @@ interface IRestApiPaths {
     update: string;
     delete: string;
     deleteAll: string;
+}
+declare type TMiddlewareRoute = Router | Array<Router> | [];
+interface IMiddleware {
+    list: TMiddlewareRoute;
+    create: TMiddlewareRoute;
+    read: TMiddlewareRoute;
+    update: TMiddlewareRoute;
+    delete: TMiddlewareRoute;
+    deleteAll: TMiddlewareRoute;
 }
 export default class ExpressRoutes {
     private modelName;
@@ -31,8 +40,12 @@ export default class ExpressRoutes {
     curdPaths(): IRestApiPaths;
     /**
      * Custom Routes
+     * @param {Router} - Express Router object
+     * @param {string} - default path string
+     * @param {Model} - mongoose model
      */
     customRoutes(router: Router, defaultPath: string, model: Model<Document<any, any>, {}, {}>): Router;
+    middleware(): IMiddleware;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
@@ -74,8 +87,20 @@ export default class ExpressRoutes {
      * Gets called before every api call
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
+     * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    before(request: MongooseRequest, response: Response, next: NextFunction): void;
+    before(request: MongooseRequest, response: Response): {
+        request: MongooseRequest;
+        response: Response;
+    };
+    /**
+     * before middleware middleware to handle before function
+     */
+    private beforeMiddleware;
+    /**
+     * Method Call Middleware
+     */
+    private methodCallMiddleware;
     /**
      * Gets called after every api call
      * @param {MongooseRequest} - Express MongooseRequest object

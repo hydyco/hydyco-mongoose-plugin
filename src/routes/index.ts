@@ -16,6 +16,16 @@ interface IRestApiPaths {
   deleteAll: string;
 }
 
+type TMiddlewareRoute = Router | Array<Router> | [];
+interface IMiddleware {
+  list: TMiddlewareRoute;
+  create: TMiddlewareRoute;
+  read: TMiddlewareRoute;
+  update: TMiddlewareRoute;
+  delete: TMiddlewareRoute;
+  deleteAll: TMiddlewareRoute;
+}
+
 enum ERestApiMethods {
   default = "default",
   list = "list",
@@ -60,6 +70,9 @@ export default class ExpressRoutes {
 
   /**
    * Custom Routes
+   * @param {Router} - Express Router object
+   * @param {string} - default path string
+   * @param {Model} - mongoose model
    */
   public customRoutes(
     router: Router,
@@ -68,6 +81,17 @@ export default class ExpressRoutes {
   ): Router {
     return router;
   } // todo : add options for custom routes
+
+  public middleware(): IMiddleware {
+    return {
+      list: [],
+      create: [],
+      read: [],
+      update: [],
+      delete: [],
+      deleteAll: [],
+    };
+  }
 
   /**
    * Get all mongoose model data
@@ -171,12 +195,39 @@ export default class ExpressRoutes {
    * Gets called before every api call
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
+   * @return {MongooseRequest,Response} - Return MongooseRequest and Response
    */
   public before(
+    request: MongooseRequest,
+    response: Response
+  ): { request: MongooseRequest; response: Response } {
+    return { request, response };
+  }
+
+  /**
+   * before middleware middleware to handle before function
+   */
+  private beforeMiddleware(
     request: MongooseRequest,
     response: Response,
     next: NextFunction
   ) {
+    const bf = this.before(request, response);
+    request = bf.request;
+    response = bf.response;
+    next();
+  }
+
+  /**
+   * Method Call Middleware
+   */
+  private methodCallMiddleware(
+    request: MongooseRequest,
+    response: Response,
+    next: NextFunction,
+    call: string
+  ) {
+    request.methodCall = call;
     next();
   }
 
@@ -203,60 +254,93 @@ export default class ExpressRoutes {
     this._router.get(
       this.curdPaths().list,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.list;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.list
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().list,
       (request: MongooseRequest, response: Response) =>
         this.list(request, response, this._model)
     );
     this._router.post(
       this.curdPaths().create,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.create;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.create
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().create,
+
       (request: MongooseRequest, response: Response) =>
         this.create(request, response, this._model)
     );
     this._router.get(
       this.curdPaths().read,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.read;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.read
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().read,
       (request: MongooseRequest, response: Response) =>
         this.read(request, response, this._model)
     );
     this._router.put(
       this.curdPaths().update,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.update;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.update
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().update,
+
       (request: MongooseRequest, response: Response) =>
         this.update(request, response, this._model)
     );
     this._router.delete(
       this.curdPaths().delete,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.delete;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.delete
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().delete,
+
       (request: MongooseRequest, response: Response) =>
         this.delete(request, response, this._model)
     );
     this._router.delete(
       this.curdPaths().deleteAll,
       (request: MongooseRequest, response: Response, next: NextFunction) => {
-        request.methodCall = ERestApiMethods.deleteAll;
-        next();
+        this.methodCallMiddleware(
+          request,
+          response,
+          next,
+          ERestApiMethods.deleteAll
+        );
       },
-      this.before,
+      this.beforeMiddleware,
+      this.middleware().deleteAll,
       (request: MongooseRequest, response: Response) =>
         this.deleteAll(request, response, this._model)
     );

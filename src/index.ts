@@ -5,8 +5,26 @@ import MongooseExpress from "./routes";
 
 const files = new HydycoFile().readAllMappingFiles();
 
-const MongooseExpressRoutes: Array<any> = files.map((file: any) =>
-  new MongooseExpress(file.name).Routes()
-);
+const MongooseExpressRoutes: any = {};
+// create mongoose model for every json file present in project
+files.forEach((file: any) => {
+  MongooseExpressRoutes[file.name] = new MongooseExpress(file.name).Routes();
+});
 
-export { HydycoModel, HydycoMongoose, MongooseExpress, MongooseExpressRoutes };
+/**
+ * Get all mongoose express routes
+ */
+const getAllRoutes = (mongooseExpressRoutes?: any) => {
+  if (mongooseExpressRoutes) {
+    return Object.values(mongooseExpressRoutes);
+  }
+  return Object.values(MongooseExpressRoutes);
+};
+
+export {
+  HydycoModel,
+  HydycoMongoose,
+  MongooseExpress,
+  MongooseExpressRoutes,
+  getAllRoutes,
+};

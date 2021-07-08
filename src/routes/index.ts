@@ -210,9 +210,10 @@ export default class ExpressRoutes {
   private beforeMiddleware(
     request: MongooseRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
+    before: Function
   ) {
-    const [req, res] = this.before(request, response);
+    const [req, res] = before(request, response);
     request = req;
     response = res;
     next();
@@ -261,7 +262,10 @@ export default class ExpressRoutes {
           ERestApiMethods.list
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
+
       this.middleware().list,
       (request: MongooseRequest, response: Response) =>
         this.list(request, response, this._model)
@@ -276,7 +280,9 @@ export default class ExpressRoutes {
           ERestApiMethods.create
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
       this.middleware().create,
 
       (request: MongooseRequest, response: Response) =>
@@ -292,7 +298,9 @@ export default class ExpressRoutes {
           ERestApiMethods.read
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
       this.middleware().read,
       (request: MongooseRequest, response: Response) =>
         this.read(request, response, this._model)
@@ -307,7 +315,9 @@ export default class ExpressRoutes {
           ERestApiMethods.update
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
       this.middleware().update,
 
       (request: MongooseRequest, response: Response) =>
@@ -323,7 +333,9 @@ export default class ExpressRoutes {
           ERestApiMethods.delete
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
       this.middleware().delete,
 
       (request: MongooseRequest, response: Response) =>
@@ -339,7 +351,9 @@ export default class ExpressRoutes {
           ERestApiMethods.deleteAll
         );
       },
-      this.beforeMiddleware,
+      (request: MongooseRequest, response: Response, next: NextFunction) => {
+        this.beforeMiddleware(request, response, next, this.before);
+      },
       this.middleware().deleteAll,
       (request: MongooseRequest, response: Response) =>
         this.deleteAll(request, response, this._model)

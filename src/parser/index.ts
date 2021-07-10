@@ -69,11 +69,14 @@ export default class HydycoModel {
     const jsonData = this._getSchemaParseData();
     const schema = new Schema(jsonData);
     schema.plugin((schema) => {
+      const populates = Object.keys(schema.obj).filter(
+        (key: any) => schema.obj[key].autopopulate
+      );
       // plugin to auto populate
       schema.pre("find", function () {
-        const populates = Object.keys(schema.obj).filter(
-          (key: any) => schema.obj[key].autopopulate
-        );
+        this.populate(populates);
+      });
+      schema.pre("findOne", function () {
         this.populate(populates);
       });
     });

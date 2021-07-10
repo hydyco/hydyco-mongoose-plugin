@@ -71,9 +71,12 @@ var HydycoModel = /** @class */ (function () {
         var jsonData = this._getSchemaParseData();
         var schema = new mongoose_1.Schema(jsonData);
         schema.plugin(function (schema) {
+            var populates = Object.keys(schema.obj).filter(function (key) { return schema.obj[key].autopopulate; });
             // plugin to auto populate
             schema.pre("find", function () {
-                var populates = Object.keys(schema.obj).filter(function (key) { return schema.obj[key].autopopulate; });
+                this.populate(populates);
+            });
+            schema.pre("findOne", function () {
                 this.populate(populates);
             });
         });

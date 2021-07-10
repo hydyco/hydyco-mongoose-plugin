@@ -199,6 +199,17 @@ const _parseTypeData = (jsonData: any) => {
         };
         delete schemaJson[fieldKey]["relationship"];
         break;
+      case "file":
+        schemaJson[fieldKey] = {
+          ...fieldData,
+          ref: getModelName(fieldData["ref"]),
+          type:
+            fieldData["relationship"] === "hasmany"
+              ? [_typeHandler("ref")]
+              : _typeHandler("ref"),
+        };
+        delete schemaJson[fieldKey]["relationship"];
+        break;
       default:
         throw new Error(
           `Unable to parse type data for ${jsonData[fieldKey]["type"]}`

@@ -79,6 +79,9 @@ export default class HydycoModel {
       schema.pre("findOne", function () {
         this.populate(populates);
       });
+      schema.pre("findById", function () {
+        this.populate(populates);
+      });
     });
     return schema;
   }

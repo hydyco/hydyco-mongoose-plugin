@@ -1,7 +1,7 @@
 /**
  * Extending Express Class
  */
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { Model, Document } from "mongoose";
 declare type MongooseRequest = Request & {
     methodCall?: string;
@@ -89,11 +89,7 @@ export default class ExpressRoutes {
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    before(request: MongooseRequest, response: Response): [request: MongooseRequest, response: Response];
-    /**
-     * before middleware middleware to handle before function
-     */
-    private beforeMiddleware;
+    before(request: MongooseRequest, response: Response, next: NextFunction): void;
     /**
      * Method Call Middleware
      */

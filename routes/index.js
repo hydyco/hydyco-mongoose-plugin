@@ -229,16 +229,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    ExpressRoutes.prototype.before = function (request, response) {
-        return [request, response];
-    };
-    /**
-     * before middleware middleware to handle before function
-     */
-    ExpressRoutes.prototype.beforeMiddleware = function (request, response, next, before) {
-        var _a = before(request, response), req = _a[0], res = _a[1];
-        request = req;
-        response = res;
+    ExpressRoutes.prototype.before = function (request, response, next) {
         next();
     };
     /**
@@ -264,44 +255,32 @@ var ExpressRoutes = /** @class */ (function () {
         }
         this._router.get(this.curdPaths().list, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.list);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().list, function (request, response) {
+        }, this.before, this.middleware().list, function (request, response) {
             return _this.list(request, response, _this._model);
         });
         this._router.post(this.curdPaths().create, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.create);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().create, function (request, response) {
+        }, this.before, this.middleware().create, function (request, response) {
             return _this.create(request, response, _this._model);
         });
         this._router.get(this.curdPaths().read, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.read);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().read, function (request, response) {
+        }, this.before, this.middleware().read, function (request, response) {
             return _this.read(request, response, _this._model);
         });
         this._router.put(this.curdPaths().update, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.update);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().update, function (request, response) {
+        }, this.before, this.middleware().update, function (request, response) {
             return _this.update(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().delete, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.delete);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().delete, function (request, response) {
+        }, this.before, this.middleware().delete, function (request, response) {
             return _this.delete(request, response, _this._model);
         });
         this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
             _this.methodCallMiddleware(request, response, next, ERestApiMethods.deleteAll);
-        }, function (request, response, next) {
-            _this.beforeMiddleware(request, response, next, _this.before);
-        }, this.middleware().deleteAll, function (request, response) {
+        }, this.before, this.middleware().deleteAll, function (request, response) {
             return _this.deleteAll(request, response, _this._model);
         });
         return this._router;

@@ -45,10 +45,12 @@ var express_1 = require("express");
 var core_1 = require("@hydyco/core");
 var parser_1 = require("../parser");
 var model_1 = require("../model");
+var file_1 = require("../file");
 var app = express_1.Router();
 var model = new model_1.default();
 var file = new core_1.HydycoFile();
 var parser = new core_1.HydycoParser();
+app.use(file_1.default()); // register router for file uploads and serving
 var EOperations;
 (function (EOperations) {
     EOperations["list"] = "list";

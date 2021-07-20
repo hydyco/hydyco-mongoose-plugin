@@ -51,12 +51,20 @@ var ERestApiMethods;
     ERestApiMethods["delete"] = "delete";
     ERestApiMethods["deleteAll"] = "deleteAll";
 })(ERestApiMethods || (ERestApiMethods = {}));
+/**
+ * Class - ExpressRoutes - Auto Generate express routes for mongoose model
+ * @param {string} modelName - Name of the Model
+ * @param {Array[string]} helperModels - Helpers Model list
+ */
 var ExpressRoutes = /** @class */ (function () {
-    function ExpressRoutes(modelName) {
-        this.modelName = modelName;
+    function ExpressRoutes(modelName, helperModels) {
+        if (helperModels === void 0) { helperModels = []; }
         this._router = express_1.Router();
         this._model = new parser_1.default(modelName).mongooseModel();
         this._defaultPath = "/" + modelName.toLowerCase();
+        this._helperModels = helperModels.map(function (model) {
+            return new parser_1.default(model).mongooseModel();
+        });
     }
     /**
      * Get all registered express routes
@@ -66,7 +74,22 @@ var ExpressRoutes = /** @class */ (function () {
         return this._boot();
     };
     /**
+     * Set Allowed methods
+     * @return {IAllowedMethods} allowedMethods
+     */
+    ExpressRoutes.prototype.allowedMethods = function () {
+        return {
+            list: true,
+            create: true,
+            read: true,
+            update: true,
+            delete: true,
+            deleteAll: true,
+        };
+    };
+    /**
      * Get all route paths for the model
+     * @return {IRestApiPaths} restApiPaths
      */
     ExpressRoutes.prototype.curdPaths = function () {
         return {
@@ -84,7 +107,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {string} - default path string
      * @param {Model} - mongoose model
      */
-    ExpressRoutes.prototype.customRoutes = function (router, defaultPath, model) {
+    ExpressRoutes.prototype.customRoutes = function (router, defaultPath, model, helperModels) {
         return router;
     }; // todo : add options for custom routes
     ExpressRoutes.prototype.middleware = function () {
@@ -229,7 +252,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    ExpressRoutes.prototype.before = function (request, response, next) {
+    ExpressRoutes.prototype.before = function (request, response, next, model, helperModels) {
         next();
     };
     /**
@@ -249,40 +272,59 @@ var ExpressRoutes = /** @class */ (function () {
     };
     ExpressRoutes.prototype._boot = function () {
         var _this = this;
-        this._router = this.customRoutes(this._router, this._defaultPath, this._model);
+        this._router = this.customRoutes(this._router, this._defaultPath, this._model, this._helperModels);
         if (!this._router) {
             throw new Error("Custom Routes should always return Router object");
         }
-        this._router.get(this.curdPaths().list, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.list);
-        }, this.before, this.middleware().list, function (request, response) {
-            return _this.list(request, response, _this._model);
-        });
-        this._router.post(this.curdPaths().create, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.create);
-        }, this.before, this.middleware().create, function (request, response) {
-            return _this.create(request, response, _this._model);
-        });
-        this._router.get(this.curdPaths().read, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.read);
-        }, this.before, this.middleware().read, function (request, response) {
-            return _this.read(request, response, _this._model);
-        });
-        this._router.put(this.curdPaths().update, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.update);
-        }, this.before, this.middleware().update, function (request, response) {
-            return _this.update(request, response, _this._model);
-        });
-        this._router.delete(this.curdPaths().delete, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.delete);
-        }, this.before, this.middleware().delete, function (request, response) {
-            return _this.delete(request, response, _this._model);
-        });
-        this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
-            _this.methodCallMiddleware(request, response, next, ERestApiMethods.deleteAll);
-        }, this.before, this.middleware().deleteAll, function (request, response) {
-            return _this.deleteAll(request, response, _this._model);
-        });
+        var allowedMethods = this.allowedMethods();
+        if (allowedMethods.list)
+            this._router.get(this.curdPaths().list, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.list);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().list, function (request, response) {
+                return _this.list(request, response, _this._model);
+            });
+        if (allowedMethods.create)
+            this._router.post(this.curdPaths().create, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.create);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().create, function (request, response) {
+                return _this.create(request, response, _this._model);
+            });
+        if (allowedMethods.read)
+            this._router.get(this.curdPaths().read, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.read);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().read, function (request, response) {
+                return _this.read(request, response, _this._model);
+            });
+        if (allowedMethods.update)
+            this._router.put(this.curdPaths().update, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.update);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().update, function (request, response) {
+                return _this.update(request, response, _this._model);
+            });
+        if (allowedMethods.delete)
+            this._router.delete(this.curdPaths().delete, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.delete);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().delete, function (request, response) {
+                return _this.delete(request, response, _this._model);
+            });
+        if (allowedMethods.deleteAll)
+            this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
+                _this.methodCallMiddleware(request, response, next, ERestApiMethods.deleteAll);
+            }, function (request, response, next) {
+                _this.before(request, response, next, _this._model, _this._helperModels);
+            }, this.middleware().deleteAll, function (request, response) {
+                return _this.deleteAll(request, response, _this._model);
+            });
         return this._router;
     };
     return ExpressRoutes;

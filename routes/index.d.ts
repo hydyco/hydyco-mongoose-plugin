@@ -14,6 +14,14 @@ interface IRestApiPaths {
     delete: string;
     deleteAll: string;
 }
+interface IAllowedMethods {
+    list: boolean;
+    create: boolean;
+    read: boolean;
+    update: boolean;
+    delete: boolean;
+    deleteAll: boolean;
+}
 declare type TMiddlewareRoute = Router | Array<Router> | [];
 interface IMiddleware {
     list: TMiddlewareRoute;
@@ -23,19 +31,30 @@ interface IMiddleware {
     delete: TMiddlewareRoute;
     deleteAll: TMiddlewareRoute;
 }
+/**
+ * Class - ExpressRoutes - Auto Generate express routes for mongoose model
+ * @param {string} modelName - Name of the Model
+ * @param {Array[string]} helperModels - Helpers Model list
+ */
 export default class ExpressRoutes {
-    private modelName;
     private _model;
     private _router;
     private _defaultPath;
-    constructor(modelName: string);
+    private _helperModels;
+    constructor(modelName: string, helperModels?: Array<string>);
     /**
      * Get all registered express routes
      * @return {Router} - Express Router Object
      */
     Routes(): Router;
     /**
+     * Set Allowed methods
+     * @return {IAllowedMethods} allowedMethods
+     */
+    allowedMethods(): IAllowedMethods;
+    /**
      * Get all route paths for the model
+     * @return {IRestApiPaths} restApiPaths
      */
     curdPaths(): IRestApiPaths;
     /**
@@ -44,7 +63,7 @@ export default class ExpressRoutes {
      * @param {string} - default path string
      * @param {Model} - mongoose model
      */
-    customRoutes(router: Router, defaultPath: string, model: Model<Document<any, any>, {}, {}>): Router;
+    customRoutes(router: Router, defaultPath: string, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Router;
     middleware(): IMiddleware;
     /**
      * Get all mongoose model data
@@ -89,7 +108,7 @@ export default class ExpressRoutes {
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    before(request: MongooseRequest, response: Response, next: NextFunction): void;
+    before(request: MongooseRequest, response: Response, next: NextFunction, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): void;
     /**
      * Method Call Middleware
      */

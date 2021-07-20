@@ -126,7 +126,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {Response} - Express Response object
      * @param {model} - Current Mongoose Model
      */
-    ExpressRoutes.prototype.list = function (request, response, model) {
+    ExpressRoutes.prototype.list = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -145,7 +145,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.create = function (request, response, model) {
+    ExpressRoutes.prototype.create = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var body, res;
             return __generator(this, function (_a) {
@@ -166,7 +166,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.read = function (request, response, model) {
+    ExpressRoutes.prototype.read = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var params, id, res;
             return __generator(this, function (_a) {
@@ -188,7 +188,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.update = function (request, response, model) {
+    ExpressRoutes.prototype.update = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var body, params, id, res;
             return __generator(this, function (_a) {
@@ -210,7 +210,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.delete = function (request, response, model) {
+    ExpressRoutes.prototype.delete = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var params, id, res;
             return __generator(this, function (_a) {
@@ -232,7 +232,7 @@ var ExpressRoutes = /** @class */ (function () {
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    ExpressRoutes.prototype.deleteAll = function (request, response, model) {
+    ExpressRoutes.prototype.deleteAll = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -283,7 +283,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().list, function (request, response) {
-                return _this.list(request, response, _this._model);
+                return _this.list(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.create)
             this._router.post(this.curdPaths().create, function (request, response, next) {
@@ -291,7 +291,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().create, function (request, response) {
-                return _this.create(request, response, _this._model);
+                return _this.create(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.read)
             this._router.get(this.curdPaths().read, function (request, response, next) {
@@ -299,7 +299,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().read, function (request, response) {
-                return _this.read(request, response, _this._model);
+                return _this.read(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.update)
             this._router.put(this.curdPaths().update, function (request, response, next) {
@@ -307,7 +307,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().update, function (request, response) {
-                return _this.update(request, response, _this._model);
+                return _this.update(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.delete)
             this._router.delete(this.curdPaths().delete, function (request, response, next) {
@@ -315,7 +315,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().delete, function (request, response) {
-                return _this.delete(request, response, _this._model);
+                return _this.delete(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.deleteAll)
             this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
@@ -323,7 +323,7 @@ var ExpressRoutes = /** @class */ (function () {
             }, function (request, response, next) {
                 _this.before(request, response, next, _this._model, _this._helperModels);
             }, this.middleware().deleteAll, function (request, response) {
-                return _this.deleteAll(request, response, _this._model);
+                return _this.deleteAll(request, response, _this._model, _this._helperModels);
             });
         return this._router;
     };

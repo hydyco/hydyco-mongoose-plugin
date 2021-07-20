@@ -140,7 +140,8 @@ export default class ExpressRoutes {
   public async list(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const res = await model.find({});
     this.after(res, request, response);
@@ -155,7 +156,8 @@ export default class ExpressRoutes {
   public async create(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const { body } = request;
     const res = await model.create(body);
@@ -171,7 +173,8 @@ export default class ExpressRoutes {
   public async read(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const { params } = request;
     const { id } = params;
@@ -188,7 +191,8 @@ export default class ExpressRoutes {
   public async update(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const { body, params } = request;
     const { id } = params;
@@ -205,7 +209,8 @@ export default class ExpressRoutes {
   public async delete(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const { params } = request;
     const { id } = params;
@@ -222,7 +227,8 @@ export default class ExpressRoutes {
   public async deleteAll(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>
+    model: Model<Document<any, any>, {}, {}>,
+    helperModels: Array<Model<Document<any, any>, {}, {}>>
   ) {
     const res = await model.remove({});
     this.after(res, request, response);
@@ -297,7 +303,7 @@ export default class ExpressRoutes {
 
         this.middleware().list,
         (request: MongooseRequest, response: Response) =>
-          this.list(request, response, this._model)
+          this.list(request, response, this._model, this._helperModels)
       );
 
     if (allowedMethods.create)
@@ -317,7 +323,7 @@ export default class ExpressRoutes {
         this.middleware().create,
 
         (request: MongooseRequest, response: Response) =>
-          this.create(request, response, this._model)
+          this.create(request, response, this._model, this._helperModels)
       );
 
     if (allowedMethods.read)
@@ -337,7 +343,7 @@ export default class ExpressRoutes {
 
         this.middleware().read,
         (request: MongooseRequest, response: Response) =>
-          this.read(request, response, this._model)
+          this.read(request, response, this._model, this._helperModels)
       );
 
     if (allowedMethods.update)
@@ -358,7 +364,7 @@ export default class ExpressRoutes {
         this.middleware().update,
 
         (request: MongooseRequest, response: Response) =>
-          this.update(request, response, this._model)
+          this.update(request, response, this._model, this._helperModels)
       );
 
     if (allowedMethods.delete)
@@ -379,7 +385,7 @@ export default class ExpressRoutes {
         this.middleware().delete,
 
         (request: MongooseRequest, response: Response) =>
-          this.delete(request, response, this._model)
+          this.delete(request, response, this._model, this._helperModels)
       );
 
     if (allowedMethods.deleteAll)
@@ -399,7 +405,7 @@ export default class ExpressRoutes {
 
         this.middleware().deleteAll,
         (request: MongooseRequest, response: Response) =>
-          this.deleteAll(request, response, this._model)
+          this.deleteAll(request, response, this._model, this._helperModels)
       );
     return this._router;
   }

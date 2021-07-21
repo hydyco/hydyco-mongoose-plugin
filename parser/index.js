@@ -18,7 +18,9 @@ var core_1 = require("@hydyco/core");
 var mongoose = require("mongoose");
 var mongoose_1 = require("mongoose");
 var HydycoModel = /** @class */ (function () {
-    function HydycoModel(fileName) {
+    function HydycoModel(fileName, _helperModels) {
+        if (_helperModels === void 0) { _helperModels = []; }
+        this._helperModels = _helperModels;
         this._singleton = false;
         this._file = new core_1.HydycoFile();
         this._parser = new core_1.HydycoParser();
@@ -45,6 +47,9 @@ var HydycoModel = /** @class */ (function () {
     };
     HydycoModel.prototype.mongooseModel = function () {
         return this._getMongooseModel();
+    };
+    HydycoModel.prototype.helperModels = function () {
+        return this._helperModels.map(function (model) { return new HydycoModel(model); });
     };
     /**
      * Get Schema json from mapping file

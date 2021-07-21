@@ -12,7 +12,7 @@ export default class HydycoModel {
   private _file: HydycoFile = new HydycoFile();
   private _parser: HydycoParser = new HydycoParser();
 
-  constructor(fileName: string) {
+  constructor(fileName: string, private _helperModels: Array<string> = []) {
     if (!fileName) throw new Error("Model name is required");
     if (this._singleton) throw new Error("Class is already initialized");
     this._singleton = true;
@@ -39,6 +39,10 @@ export default class HydycoModel {
 
   public mongooseModel() {
     return this._getMongooseModel();
+  }
+
+  public helperModels() {
+    return this._helperModels.map((model) => new HydycoModel(model));
   }
 
   /**

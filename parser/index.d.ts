@@ -1,17 +1,19 @@
 import * as mongoose from "mongoose";
 import { Schema, Model, Document } from "mongoose";
 export default class HydycoModel {
+    private _helperModels;
     private _fileName;
     private _singleton;
     private _schema;
     private _file;
     private _parser;
-    constructor(fileName: string);
+    constructor(fileName: string, _helperModels?: Array<string>);
     raw(): Object;
     parsed(): any;
     mongooseSchema(): mongoose.Schema<mongoose.Document<any, any>, mongoose.Model<any, any, any>, undefined, any>;
     setMongooseSchema(schema: Schema): void;
     mongooseModel(): mongoose.Model<mongoose.Document<any, any>, {}, {}>;
+    helperModels(): HydycoModel[];
     /**
      * Get Schema json from mapping file
      *

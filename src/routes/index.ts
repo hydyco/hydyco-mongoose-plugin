@@ -142,7 +142,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const res = await model.find({});
     this.after(res, request, response);
   }
@@ -158,7 +158,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const { body } = request;
     const res = await model.create(body);
     this.after(res, request, response);
@@ -175,7 +175,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const { params } = request;
     const { id } = params;
     const res = await model.findById(id);
@@ -193,7 +193,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const { body, params } = request;
     const { id } = params;
     const res = await model.findByIdAndUpdate(id, body);
@@ -211,7 +211,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const { params } = request;
     const { id } = params;
     const res: any = await model.findByIdAndDelete(id);
@@ -229,7 +229,7 @@ export default class ExpressRoutes {
     response: Response,
     model: Model<Document<any, any>, {}, {}>,
     helperModels: Array<Model<Document<any, any>, {}, {}>>
-  ) {
+  ): Promise<any> {
     const res = await model.remove({});
     this.after(res, request, response);
   }

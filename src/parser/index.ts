@@ -228,6 +228,12 @@ const _parseTypeData = (jsonData: any) => {
         };
         delete schemaJson[fieldKey]["relationship"];
         break;
+      case "json":
+        schemaJson[fieldKey] = {
+          ...fieldData,
+          type: _typeHandler("json"),
+        };
+        break;
       default:
         throw new Error(
           `Unable to parse type data for ${jsonData[fieldKey]["type"]}`
@@ -260,6 +266,8 @@ const _typeHandler = (type: string) => {
       return Schema.Types.Date;
     case "ref":
       return Schema.Types.ObjectId;
+    case "json":
+      return Schema.Types.Mixed;
 
     default:
       throw new Error(

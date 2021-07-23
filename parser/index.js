@@ -186,6 +186,9 @@ var _parseTypeData = function (jsonData) {
                         : _typeHandler("ref") });
                 delete schemaJson[fieldKey]["relationship"];
                 break;
+            case "json":
+                schemaJson[fieldKey] = __assign(__assign({}, fieldData), { type: _typeHandler("json") });
+                break;
             default:
                 throw new Error("Unable to parse type data for " + jsonData[fieldKey]["type"]);
         }
@@ -212,6 +215,8 @@ var _typeHandler = function (type) {
             return mongoose_1.Schema.Types.Date;
         case "ref":
             return mongoose_1.Schema.Types.ObjectId;
+        case "json":
+            return mongoose_1.Schema.Types.Mixed;
         default:
             throw new Error("Unable to determine data type of given argument : " + type);
     }

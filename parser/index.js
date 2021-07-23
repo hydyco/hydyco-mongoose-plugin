@@ -33,9 +33,12 @@ var HydycoModel = /** @class */ (function () {
         this._schema = this.mongooseSchema();
     }
     HydycoModel.prototype.raw = function () {
+        return this._getRawJson();
+    };
+    HydycoModel.prototype.rawSchema = function () {
         return this._getSchemaJson();
     };
-    HydycoModel.prototype.parsed = function () {
+    HydycoModel.prototype.parsedSchema = function () {
         return this._getSchemaParseData();
     };
     HydycoModel.prototype.mongooseSchema = function () {
@@ -50,6 +53,9 @@ var HydycoModel = /** @class */ (function () {
     };
     HydycoModel.prototype.helperModels = function () {
         return this._helperModels.map(function (model) { return new HydycoModel(model); });
+    };
+    HydycoModel.prototype._getRawJson = function () {
+        return this._file.readMappingFile(this._fileName);
     };
     /**
      * Get Schema json from mapping file

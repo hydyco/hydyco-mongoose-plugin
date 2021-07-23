@@ -21,10 +21,14 @@ export default class HydycoModel {
   }
 
   public raw() {
+    return this._getRawJson();
+  }
+
+  public rawSchema() {
     return this._getSchemaJson();
   }
 
-  public parsed() {
+  public parsedSchema() {
     return this._getSchemaParseData();
   }
 
@@ -43,6 +47,10 @@ export default class HydycoModel {
 
   public helperModels() {
     return this._helperModels.map((model) => new HydycoModel(model));
+  }
+
+  private _getRawJson() {
+    return this._file.readMappingFile(this._fileName);
   }
 
   /**

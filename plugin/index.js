@@ -184,8 +184,8 @@ function crud(request, response) {
                     body = request.body;
                     Model = new parser_1.default(parser.getModelName(body.model));
                     operationModel = Model.mongooseModel();
-                    operationSchema = Model.parsed();
-                    operationRaw = Model.raw();
+                    operationSchema = Model.parsedSchema();
+                    operationRaw = Model.rawSchema();
                     _d.label = 1;
                 case 1:
                     _d.trys.push([1, 16, , 17]);

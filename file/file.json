@@ -105,6 +105,14 @@
             "autopopulate": true
         }
     },
+    "operations": {
+        "list": false,
+        "create": false,
+        "read": false,
+        "update": false,
+        "delete": false,
+        "deleteAll": false
+    },
     "fields": 6,
     "x": 950,
     "y": 240

@@ -8,12 +8,14 @@ export default class HydycoModel {
     private _file;
     private _parser;
     constructor(fileName: string, _helperModels?: Array<string>);
-    raw(): Object;
-    parsed(): any;
+    raw(): any;
+    rawSchema(): Object;
+    parsedSchema(): any;
     mongooseSchema(): mongoose.Schema<mongoose.Document<any, any>, mongoose.Model<any, any, any>, undefined, any>;
     setMongooseSchema(schema: Schema): void;
     mongooseModel(): mongoose.Model<mongoose.Document<any, any>, {}, {}>;
     helperModels(): HydycoModel[];
+    private _getRawJson;
     /**
      * Get Schema json from mapping file
      *

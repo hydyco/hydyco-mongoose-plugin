@@ -138,8 +138,8 @@ async function crud(request: Request, response: Response) {
   const body: ICurdBody = request.body;
   const Model = new Parser(parser.getModelName(body.model));
   const operationModel = Model.mongooseModel();
-  const operationSchema = Model.parsed();
-  const operationRaw: any = Model.raw();
+  const operationSchema = Model.parsedSchema();
+  const operationRaw: any = Model.rawSchema();
 
   try {
     switch (body.operations) {

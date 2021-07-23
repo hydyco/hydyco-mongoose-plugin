@@ -160,6 +160,7 @@ async function crud(request: Request, response: Response) {
               ? "hasmany"
               : "hasone"
             : operationSchema[key].type.schemaName.toLowerCase(),
+          file: operationSchema[key].ref === "File",
         }));
         const total = await operationModel.count();
         const expectedResult = current * pageSize;

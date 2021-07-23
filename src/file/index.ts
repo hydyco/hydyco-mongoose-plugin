@@ -47,7 +47,10 @@ const fileUpload = (uploadDir: string = "uploads") => {
     async function (req: any, res, next) {
       const { field } = req.params;
       req.file.fieldname = field;
-      const file = await File.create(req.file);
+      const file = await File.create({
+        ...req.file,
+        path: "/admin/file/get/" + req.file.filename,
+      });
       return res.send(file._id);
     }
   );

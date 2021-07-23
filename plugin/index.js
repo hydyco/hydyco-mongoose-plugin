@@ -217,6 +217,7 @@ function crud(request, response) {
                                 ? "hasmany"
                                 : "hasone"
                             : operationSchema[key].type.schemaName.toLowerCase(),
+                        file: operationSchema[key].ref === "File",
                     }); });
                     return [4 /*yield*/, operationModel.count()];
                 case 4:

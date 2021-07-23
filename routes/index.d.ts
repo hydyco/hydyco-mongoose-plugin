@@ -14,14 +14,6 @@ interface IRestApiPaths {
     delete: string;
     deleteAll: string;
 }
-interface IAllowedMethods {
-    list: boolean;
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-    deleteAll: boolean;
-}
 declare type TMiddlewareRoute = Router | Array<Router> | [];
 interface IMiddleware {
     list: TMiddlewareRoute;
@@ -41,6 +33,7 @@ export default class ExpressRoutes {
     private _router;
     private _defaultPath;
     private _helperModels;
+    private _modelHelper;
     constructor(modelName: string, helperModels?: Array<string>);
     /**
      * Get all registered express routes
@@ -51,7 +44,7 @@ export default class ExpressRoutes {
      * Set Allowed methods
      * @return {IAllowedMethods} allowedMethods
      */
-    allowedMethods(): IAllowedMethods;
+    private allowedMethods;
     /**
      * Get all route paths for the model
      * @return {IRestApiPaths} restApiPaths

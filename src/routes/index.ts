@@ -56,9 +56,11 @@ export default class ExpressRoutes {
   private _router = Router();
   private _defaultPath: string;
   private _helperModels: Array<Model<Document<any, any>, {}, {}>>;
+  private _modelHelper: Parser;
 
   constructor(modelName: string, helperModels: Array<string> = []) {
     this._model = new Parser(modelName).mongooseModel();
+    this._modelHelper = new Parser(modelName);
     this._defaultPath = `/${modelName.toLowerCase()}`;
     this._helperModels = helperModels.map((model) =>
       new Parser(model).mongooseModel()
@@ -78,14 +80,10 @@ export default class ExpressRoutes {
    * @return {IAllowedMethods} allowedMethods
    */
 
-  public allowedMethods(): IAllowedMethods {
+  private allowedMethods(): IAllowedMethods {
+    const { operations }: any = this._modelHelper.raw();
     return {
-      list: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      deleteAll: true,
+      ...operations,
     };
   }
 

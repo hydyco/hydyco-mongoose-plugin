@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -61,6 +72,7 @@ var ExpressRoutes = /** @class */ (function () {
         if (helperModels === void 0) { helperModels = []; }
         this._router = express_1.Router();
         this._model = new parser_1.default(modelName).mongooseModel();
+        this._modelHelper = new parser_1.default(modelName);
         this._defaultPath = "/" + modelName.toLowerCase();
         this._helperModels = helperModels.map(function (model) {
             return new parser_1.default(model).mongooseModel();
@@ -78,14 +90,8 @@ var ExpressRoutes = /** @class */ (function () {
      * @return {IAllowedMethods} allowedMethods
      */
     ExpressRoutes.prototype.allowedMethods = function () {
-        return {
-            list: true,
-            create: true,
-            read: true,
-            update: true,
-            delete: true,
-            deleteAll: true,
-        };
+        var operations = this._modelHelper.raw().operations;
+        return __assign({}, operations);
     };
     /**
      * Get all route paths for the model

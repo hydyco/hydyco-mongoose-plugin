@@ -3,14 +3,11 @@ import { HydycoFile, HydycoParser } from "@hydyco/core";
 import { Schema } from "mongoose";
 import Parser from "../parser";
 import Model from "../model";
-import File from "../file";
 
 const app = Router();
 const model = new Model();
 const file = new HydycoFile();
 const parser = new HydycoParser();
-
-app.use(File()); // register router for file uploads and serving
 
 enum EOperations {
   list = "list",

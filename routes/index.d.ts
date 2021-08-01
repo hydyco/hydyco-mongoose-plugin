@@ -6,23 +6,6 @@ import { Model, Document } from "mongoose";
 declare type MongooseRequest = Request & {
     methodCall?: string;
 };
-interface IRestApiPaths {
-    list: string;
-    create: string;
-    read: string;
-    update: string;
-    delete: string;
-    deleteAll: string;
-}
-declare type TMiddlewareRoute = Router | Array<Router> | [];
-interface IMiddleware {
-    list: TMiddlewareRoute;
-    create: TMiddlewareRoute;
-    read: TMiddlewareRoute;
-    update: TMiddlewareRoute;
-    delete: TMiddlewareRoute;
-    deleteAll: TMiddlewareRoute;
-}
 /**
  * Class - ExpressRoutes - Auto Generate express routes for mongoose model
  * @param {string} modelName - Name of the Model
@@ -34,6 +17,7 @@ export default class ExpressRoutes {
     private _defaultPath;
     private _helperModels;
     private _modelHelper;
+    private _middleware;
     constructor(modelName: string, helperModels?: Array<string>);
     /**
      * Get all registered express routes
@@ -49,7 +33,7 @@ export default class ExpressRoutes {
      * Get all route paths for the model
      * @return {IRestApiPaths} restApiPaths
      */
-    curdPaths(): IRestApiPaths;
+    private curdPaths;
     /**
      * Custom Routes
      * @param {Router} - Express Router object
@@ -57,7 +41,12 @@ export default class ExpressRoutes {
      * @param {Model} - mongoose model
      */
     customRoutes(router: Router, defaultPath: string, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Router;
-    middleware(): IMiddleware;
+    /**
+     * Add routes methods
+     * @param {IMiddleware} method - Name of the method
+     * @param {Function}  middleware - Express Middleware
+     */
+    addMiddleware(method: string, middleware: any): void;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
@@ -113,5 +102,9 @@ export default class ExpressRoutes {
      */
     after(res: any, request: MongooseRequest, response: Response): Response<any, Record<string, any>>;
     private _boot;
+    /**
+     * Apply Middleware to methods
+     */
+    private _applyMiddleware;
 }
 export {};

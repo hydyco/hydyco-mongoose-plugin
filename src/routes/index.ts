@@ -1,7 +1,14 @@
 /**
  * Extending Express Class
  */
-import { Router, Request, Response, NextFunction } from "express";
+import {
+  Router,
+  Request,
+  Response,
+  NextFunction,
+  RequestHandler,
+  IRouter,
+} from "express";
 import { Model, Document } from "mongoose";
 import Parser from "../parser";
 
@@ -25,7 +32,7 @@ interface IAllowedMethods {
   deleteAll: boolean;
 }
 
-type TMiddlewareRoute = Router | Array<Router> | [];
+type TMiddlewareRoute = Array<RequestHandler> | Array<IRouter>;
 interface IMiddleware {
   list: TMiddlewareRoute;
   create: TMiddlewareRoute;
@@ -57,6 +64,14 @@ export default class ExpressRoutes {
   private _defaultPath: string;
   private _helperModels: Array<Model<Document<any, any>, {}, {}>>;
   private _modelHelper: Parser;
+  private _middleware: IMiddleware = {
+    list: [],
+    create: [],
+    read: [],
+    update: [],
+    delete: [],
+    deleteAll: [],
+  };
 
   constructor(modelName: string, helperModels: Array<string> = []) {
     this._model = new Parser(modelName).mongooseModel();
@@ -79,7 +94,6 @@ export default class ExpressRoutes {
    * Set Allowed methods
    * @return {IAllowedMethods} allowedMethods
    */
-
   private allowedMethods(): IAllowedMethods {
     const { operations }: any = this._modelHelper.raw();
     return {
@@ -91,7 +105,7 @@ export default class ExpressRoutes {
    * Get all route paths for the model
    * @return {IRestApiPaths} restApiPaths
    */
-  public curdPaths(): IRestApiPaths {
+  private curdPaths(): IRestApiPaths {
     return {
       list: `${this._defaultPath}`,
       create: `${this._defaultPath}`,
@@ -115,17 +129,48 @@ export default class ExpressRoutes {
     helperModels: Array<Model<Document<any, any>, {}, {}>>
   ): Router {
     return router;
-  } // todo : add options for custom routes
+  }
 
-  public middleware(): IMiddleware {
-    return {
-      list: [],
-      create: [],
-      read: [],
-      update: [],
-      delete: [],
-      deleteAll: [],
-    };
+  /**
+   * Add routes methods
+   * @param {IMiddleware} method - Name of the method
+   * @param {Function}  middleware - Express Middleware
+   */
+  public addMiddleware(method: string, middleware: any): void {
+    switch (method) {
+      case "list":
+        if (Array.isArray(middleware))
+          this._middleware.list.push(...middleware);
+        else this._middleware.list.push(middleware);
+        break;
+      case "create":
+        if (Array.isArray(middleware))
+          this._middleware.create.push(...middleware);
+        else this._middleware.create.push(middleware);
+        break;
+      case "update":
+        if (Array.isArray(middleware))
+          this._middleware.update.push(...middleware);
+        else this._middleware.update.push(middleware);
+        break;
+      case "read":
+        if (Array.isArray(middleware))
+          this._middleware.read.push(...middleware);
+        else this._middleware.read.push(middleware);
+        break;
+      case "delete":
+        if (Array.isArray(middleware))
+          this._middleware.delete.push(...middleware);
+        else this._middleware.delete.push(middleware);
+        break;
+      case "deleteAll":
+        if (Array.isArray(middleware))
+          this._middleware.deleteAll.push(...middleware);
+        else this._middleware.deleteAll.push(middleware);
+        break;
+      default:
+        throw new Error(`${method} not allowed`);
+    }
   }
 
   /**
@@ -134,7 +179,6 @@ export default class ExpressRoutes {
    * @param {Response} - Express Response object
    * @param {model} - Current Mongoose Model
    */
-
   public async list(
     request: MongooseRequest,
     response: Response,
@@ -150,7 +194,6 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-
   public async create(
     request: MongooseRequest,
     response: Response,
@@ -167,7 +210,6 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-
   public async read(
     request: MongooseRequest,
     response: Response,
@@ -185,7 +227,6 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-
   public async update(
     request: MongooseRequest,
     response: Response,
@@ -203,7 +244,6 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-
   public async delete(
     request: MongooseRequest,
     response: Response,
@@ -221,7 +261,6 @@ export default class ExpressRoutes {
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
    */
-
   public async deleteAll(
     request: MongooseRequest,
     response: Response,
@@ -283,23 +322,12 @@ export default class ExpressRoutes {
     }
 
     const allowedMethods = this.allowedMethods();
+    this._applyMiddleware();
 
     if (allowedMethods.list)
       this._router.get(
         this.curdPaths().list,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.list
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-
-        this.middleware().list,
+        this._middleware.list,
         (request: MongooseRequest, response: Response) =>
           this.list(request, response, this._model, this._helperModels)
       );
@@ -307,19 +335,7 @@ export default class ExpressRoutes {
     if (allowedMethods.create)
       this._router.post(
         this.curdPaths().create,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.create
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-        this.middleware().create,
-
+        this._middleware.create,
         (request: MongooseRequest, response: Response) =>
           this.create(request, response, this._model, this._helperModels)
       );
@@ -327,19 +343,7 @@ export default class ExpressRoutes {
     if (allowedMethods.read)
       this._router.get(
         this.curdPaths().read,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.read
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-
-        this.middleware().read,
+        this._middleware.read,
         (request: MongooseRequest, response: Response) =>
           this.read(request, response, this._model, this._helperModels)
       );
@@ -347,20 +351,7 @@ export default class ExpressRoutes {
     if (allowedMethods.update)
       this._router.put(
         this.curdPaths().update,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.update
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-
-        this.middleware().update,
-
+        this._middleware.update,
         (request: MongooseRequest, response: Response) =>
           this.update(request, response, this._model, this._helperModels)
       );
@@ -368,20 +359,7 @@ export default class ExpressRoutes {
     if (allowedMethods.delete)
       this._router.delete(
         this.curdPaths().delete,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.delete
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-
-        this.middleware().delete,
-
+        this._middleware.delete,
         (request: MongooseRequest, response: Response) =>
           this.delete(request, response, this._model, this._helperModels)
       );
@@ -389,22 +367,42 @@ export default class ExpressRoutes {
     if (allowedMethods.deleteAll)
       this._router.delete(
         this.curdPaths().deleteAll,
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.methodCallMiddleware(
-            request,
-            response,
-            next,
-            ERestApiMethods.deleteAll
-          );
-        },
-        (request: MongooseRequest, response: Response, next: NextFunction) => {
-          this.before(request, response, next, this._model, this._helperModels);
-        },
-
-        this.middleware().deleteAll,
+        this._middleware.deleteAll,
         (request: MongooseRequest, response: Response) =>
           this.deleteAll(request, response, this._model, this._helperModels)
       );
     return this._router;
+  }
+
+  /**
+   * Apply Middleware to methods
+   */
+  private _applyMiddleware() {
+    ["list", "create", "update", "delete", "read", "deleteAll"].forEach(
+      (method: any) => {
+        this.addMiddleware(method, [
+          (
+            request: MongooseRequest,
+            response: Response,
+            next: NextFunction
+          ) => {
+            this.methodCallMiddleware(request, response, next, method);
+          },
+          (
+            request: MongooseRequest,
+            response: Response,
+            next: NextFunction
+          ) => {
+            this.before(
+              request,
+              response,
+              next,
+              this._model,
+              this._helperModels
+            );
+          },
+        ]);
+      }
+    );
   }
 }

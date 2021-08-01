@@ -71,6 +71,14 @@ var ExpressRoutes = /** @class */ (function () {
     function ExpressRoutes(modelName, helperModels) {
         if (helperModels === void 0) { helperModels = []; }
         this._router = express_1.Router();
+        this._middleware = {
+            list: [],
+            create: [],
+            read: [],
+            update: [],
+            delete: [],
+            deleteAll: [],
+        };
         this._model = new parser_1.default(modelName).mongooseModel();
         this._modelHelper = new parser_1.default(modelName);
         this._defaultPath = "/" + modelName.toLowerCase();
@@ -115,16 +123,54 @@ var ExpressRoutes = /** @class */ (function () {
      */
     ExpressRoutes.prototype.customRoutes = function (router, defaultPath, model, helperModels) {
         return router;
-    }; // todo : add options for custom routes
-    ExpressRoutes.prototype.middleware = function () {
-        return {
-            list: [],
-            create: [],
-            read: [],
-            update: [],
-            delete: [],
-            deleteAll: [],
-        };
+    };
+    /**
+     * Add routes methods
+     * @param {IMiddleware} method - Name of the method
+     * @param {Function}  middleware - Express Middleware
+     */
+    ExpressRoutes.prototype.addMiddleware = function (method, middleware) {
+        var _a, _b, _c, _d, _e, _f;
+        switch (method) {
+            case "list":
+                if (Array.isArray(middleware))
+                    (_a = this._middleware.list).push.apply(_a, middleware);
+                else
+                    this._middleware.list.push(middleware);
+                break;
+            case "create":
+                if (Array.isArray(middleware))
+                    (_b = this._middleware.create).push.apply(_b, middleware);
+                else
+                    this._middleware.create.push(middleware);
+                break;
+            case "update":
+                if (Array.isArray(middleware))
+                    (_c = this._middleware.update).push.apply(_c, middleware);
+                else
+                    this._middleware.update.push(middleware);
+                break;
+            case "read":
+                if (Array.isArray(middleware))
+                    (_d = this._middleware.read).push.apply(_d, middleware);
+                else
+                    this._middleware.read.push(middleware);
+                break;
+            case "delete":
+                if (Array.isArray(middleware))
+                    (_e = this._middleware.delete).push.apply(_e, middleware);
+                else
+                    this._middleware.delete.push(middleware);
+                break;
+            case "deleteAll":
+                if (Array.isArray(middleware))
+                    (_f = this._middleware.deleteAll).push.apply(_f, middleware);
+                else
+                    this._middleware.deleteAll.push(middleware);
+                break;
+            default:
+                throw new Error(method + " not allowed");
+        }
     };
     /**
      * Get all mongoose model data
@@ -283,55 +329,48 @@ var ExpressRoutes = /** @class */ (function () {
             throw new Error("Custom Routes should always return Router object");
         }
         var allowedMethods = this.allowedMethods();
+        this._applyMiddleware();
         if (allowedMethods.list)
-            this._router.get(this.curdPaths().list, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.list);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().list, function (request, response) {
+            this._router.get(this.curdPaths().list, this._middleware.list, function (request, response) {
                 return _this.list(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.create)
-            this._router.post(this.curdPaths().create, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.create);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().create, function (request, response) {
+            this._router.post(this.curdPaths().create, this._middleware.create, function (request, response) {
                 return _this.create(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.read)
-            this._router.get(this.curdPaths().read, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.read);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().read, function (request, response) {
+            this._router.get(this.curdPaths().read, this._middleware.read, function (request, response) {
                 return _this.read(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.update)
-            this._router.put(this.curdPaths().update, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.update);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().update, function (request, response) {
+            this._router.put(this.curdPaths().update, this._middleware.update, function (request, response) {
                 return _this.update(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.delete)
-            this._router.delete(this.curdPaths().delete, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.delete);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().delete, function (request, response) {
+            this._router.delete(this.curdPaths().delete, this._middleware.delete, function (request, response) {
                 return _this.delete(request, response, _this._model, _this._helperModels);
             });
         if (allowedMethods.deleteAll)
-            this._router.delete(this.curdPaths().deleteAll, function (request, response, next) {
-                _this.methodCallMiddleware(request, response, next, ERestApiMethods.deleteAll);
-            }, function (request, response, next) {
-                _this.before(request, response, next, _this._model, _this._helperModels);
-            }, this.middleware().deleteAll, function (request, response) {
+            this._router.delete(this.curdPaths().deleteAll, this._middleware.deleteAll, function (request, response) {
                 return _this.deleteAll(request, response, _this._model, _this._helperModels);
             });
         return this._router;
+    };
+    /**
+     * Apply Middleware to methods
+     */
+    ExpressRoutes.prototype._applyMiddleware = function () {
+        var _this = this;
+        ["list", "create", "update", "delete", "read", "deleteAll"].forEach(function (method) {
+            _this.addMiddleware(method, [
+                function (request, response, next) {
+                    _this.methodCallMiddleware(request, response, next, method);
+                },
+                function (request, response, next) {
+                    _this.before(request, response, next, _this._model, _this._helperModels);
+                },
+            ]);
+        });
     };
     return ExpressRoutes;
 }());

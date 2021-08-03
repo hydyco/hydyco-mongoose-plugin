@@ -51,6 +51,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * Extending Express Class
  */
 var express_1 = require("express");
+var auth_1 = require("@hydyco/auth");
 var parser_1 = require("../parser");
 var ERestApiMethods;
 (function (ERestApiMethods) {
@@ -371,6 +372,17 @@ var ExpressRoutes = /** @class */ (function () {
                 },
             ]);
         });
+        // make routes authenticated
+        // if route is not public then it is treated as authenticated route
+        var modelJsonData = this._modelHelper.raw();
+        if (modelJsonData["publicMethods"]) {
+            var publicMethods_1 = modelJsonData["publicMethods"];
+            Object.keys(publicMethods_1).forEach(function (key) {
+                if (!publicMethods_1[key]) {
+                    _this.addMiddleware(key, auth_1.makeAuth);
+                }
+            });
+        }
     };
     return ExpressRoutes;
 }());

@@ -10,6 +10,7 @@ import {
   IRouter,
 } from "express";
 import { Model, Document } from "mongoose";
+import { makeAuth } from "@hydyco/auth";
 import Parser from "../parser";
 
 type MongooseRequest = Request & { methodCall?: string };
@@ -404,5 +405,18 @@ export default class ExpressRoutes {
         ]);
       }
     );
+
+    // make routes authenticated
+    // if route is not public then it is treated as authenticated route
+    const modelJsonData: any = this._modelHelper.raw();
+
+    if (modelJsonData["publicMethods"]) {
+      const publicMethods = modelJsonData["publicMethods"];
+      Object.keys(publicMethods).forEach((key) => {
+        if (!publicMethods[key]) {
+          this.addMiddleware(key, makeAuth);
+        }
+      });
+    }
   }
 }

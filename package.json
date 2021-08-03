@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hydyco/auth": "git+https://github.com/iamrahultanwar/hydyco-auth.git",
     "@hydyco/core": "git+https://github.com/iamrahultanwar/hydyco-core.git",
     "@types/multer": "^1.4.7",
     "mongoose": "^5.13.0",

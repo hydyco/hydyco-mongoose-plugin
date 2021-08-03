@@ -362,7 +362,14 @@ var ExpressRoutes = /** @class */ (function () {
      */
     ExpressRoutes.prototype._applyMiddleware = function () {
         var _this = this;
+        // make routes authenticated
+        // if route is not public then it is treated as authenticated route
+        var modelJsonData = this._modelHelper.raw();
         ["list", "create", "update", "delete", "read", "deleteAll"].forEach(function (method) {
+            var publicMethods = modelJsonData["publicMethods"];
+            if (!publicMethods[method]) {
+                _this.addMiddleware(method, auth_1.makeAuth);
+            }
             _this.addMiddleware(method, [
                 function (request, response, next) {
                     _this.methodCallMiddleware(request, response, next, method);
@@ -372,17 +379,6 @@ var ExpressRoutes = /** @class */ (function () {
                 },
             ]);
         });
-        // make routes authenticated
-        // if route is not public then it is treated as authenticated route
-        var modelJsonData = this._modelHelper.raw();
-        if (modelJsonData["publicMethods"]) {
-            var publicMethods_1 = modelJsonData["publicMethods"];
-            Object.keys(publicMethods_1).forEach(function (key) {
-                if (!publicMethods_1[key]) {
-                    _this.addMiddleware(key, auth_1.makeAuth);
-                }
-            });
-        }
     };
     return ExpressRoutes;
 }());

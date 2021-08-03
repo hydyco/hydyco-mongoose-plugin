@@ -379,8 +379,16 @@ export default class ExpressRoutes {
    * Apply Middleware to methods
    */
   private _applyMiddleware() {
+    // make routes authenticated
+    // if route is not public then it is treated as authenticated route
+    const modelJsonData: any = this._modelHelper.raw();
+
     ["list", "create", "update", "delete", "read", "deleteAll"].forEach(
       (method: any) => {
+        const publicMethods = modelJsonData["publicMethods"];
+        if (!publicMethods[method]) {
+          this.addMiddleware(method, makeAuth);
+        }
         this.addMiddleware(method, [
           (
             request: MongooseRequest,
@@ -405,18 +413,5 @@ export default class ExpressRoutes {
         ]);
       }
     );
-
-    // make routes authenticated
-    // if route is not public then it is treated as authenticated route
-    const modelJsonData: any = this._modelHelper.raw();
-
-    if (modelJsonData["publicMethods"]) {
-      const publicMethods = modelJsonData["publicMethods"];
-      Object.keys(publicMethods).forEach((key) => {
-        if (!publicMethods[key]) {
-          this.addMiddleware(key, makeAuth);
-        }
-      });
-    }
   }
 }

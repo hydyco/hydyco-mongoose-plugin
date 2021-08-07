@@ -367,7 +367,7 @@ var ExpressRoutes = /** @class */ (function () {
         var modelJsonData = this._modelHelper.raw();
         ["list", "create", "update", "delete", "read", "deleteAll"].forEach(function (method) {
             var publicMethods = modelJsonData["publicMethods"];
-            if (!publicMethods[method]) {
+            if (modelJsonData.status && !publicMethods[method]) {
                 _this.addMiddleware(method, auth_1.makeAuth);
             }
             _this.addMiddleware(method, [

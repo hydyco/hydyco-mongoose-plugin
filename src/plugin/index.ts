@@ -150,6 +150,7 @@ async function crud(request: Request, response: Response) {
           .skip((current - 1) * pageSize)
           .limit(pageSize)
           .lean();
+
         const column = Object.keys(operationSchema).map((key) => ({
           name: key,
           type: operationSchema[key].ref
@@ -214,7 +215,7 @@ async function crud(request: Request, response: Response) {
         return response.json({ list: refList, searchValues });
     }
   } catch (error: any) {
-    return response.json(error.message);
+    return response.json({ status: false, message: error.message }).status(500);
   }
 }
 

@@ -274,7 +274,7 @@ function crud(request, response) {
                 case 15: return [3 /*break*/, 17];
                 case 16:
                     error_1 = _d.sent();
-                    return [2 /*return*/, response.json(error_1.message)];
+                    return [2 /*return*/, response.json({ status: false, message: error_1.message }).status(500)];
                 case 17: return [2 /*return*/];
             }
         });

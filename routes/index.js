@@ -47,11 +47,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.HydycoQuery = void 0;
 /**
  * Extending Express Class
  */
 var express_1 = require("express");
 var auth_1 = require("@hydyco/auth");
+var mquery = require("express-mquery"); // ts-types not found
 var parser_1 = require("../parser");
 var ERestApiMethods;
 (function (ERestApiMethods) {
@@ -63,6 +65,31 @@ var ERestApiMethods;
     ERestApiMethods["delete"] = "delete";
     ERestApiMethods["deleteAll"] = "deleteAll";
 })(ERestApiMethods || (ERestApiMethods = {}));
+/**
+ * Function - Make Mongoose Data query using mquery parsed object
+ * @param {Object} query - mquery parsed req object
+ * @param {Object} Model - Mongoose Model
+ * @return {Promise}
+ */
+var HydycoQuery = function (query, Model) {
+    if (query) {
+        query = {
+            filter: query.filter || {},
+            paginate: query.paginate || { limit: 10, skip: 0, page: 1 },
+            select: query.select || {},
+            sort: query.sort || {},
+        };
+        return Model.find(query.filter)
+            .select(query.select)
+            .sort(query.sort)
+            .limit(query.paginate.limit)
+            .skip((query.paginate.page - 1) * query.paginate.limit);
+    }
+    else {
+        return Model.find({});
+    }
+};
+exports.HydycoQuery = HydycoQuery;
 /**
  * Class - ExpressRoutes - Auto Generate express routes for mongoose model
  * @param {string} modelName - Name of the Model
@@ -184,7 +211,7 @@ var ExpressRoutes = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, model.find({})];
+                    case 0: return [4 /*yield*/, exports.HydycoQuery(request.mquery, model)];
                     case 1:
                         res = _a.sent();
                         this.after(res, request, response);
@@ -240,6 +267,7 @@ var ExpressRoutes = /** @class */ (function () {
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
+     *
      */
     ExpressRoutes.prototype.update = function (request, response, model, helperModels) {
         return __awaiter(this, void 0, void 0, function () {
@@ -369,6 +397,9 @@ var ExpressRoutes = /** @class */ (function () {
             var publicMethods = modelJsonData["publicMethods"];
             if (modelJsonData.status && !publicMethods[method]) {
                 _this.addMiddleware(method, auth_1.makeAuth);
+            }
+            if (method === "list") {
+                _this.addMiddleware(method, mquery({ limit: 10 }));
             }
             _this.addMiddleware(method, [
                 function (request, response, next) {

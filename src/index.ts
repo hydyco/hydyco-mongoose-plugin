@@ -1,6 +1,6 @@
 import HydycoModel from "./parser";
 import HydycoMongoose from "./plugin";
-import MongooseExpress from "./routes";
+import MongooseExpress, { HydycoQuery } from "./routes";
 
 import { HydycoFile } from "@hydyco/core";
 
@@ -28,4 +28,5 @@ export {
   MongooseExpress,
   MongooseExpressRoutes,
   HydycoRoutes,
+  HydycoQuery,
 };

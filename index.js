@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HydycoRoutes = exports.MongooseExpressRoutes = exports.MongooseExpress = exports.HydycoMongoose = exports.HydycoModel = void 0;
+exports.HydycoQuery = exports.HydycoRoutes = exports.MongooseExpressRoutes = exports.MongooseExpress = exports.HydycoMongoose = exports.HydycoModel = void 0;
 var parser_1 = require("./parser");
 exports.HydycoModel = parser_1.default;
 var plugin_1 = require("./plugin");
 exports.HydycoMongoose = plugin_1.default;
 var routes_1 = require("./routes");
 exports.MongooseExpress = routes_1.default;
+Object.defineProperty(exports, "HydycoQuery", { enumerable: true, get: function () { return routes_1.HydycoQuery; } });
 var core_1 = require("@hydyco/core");
 var files = new core_1.HydycoFile().readAllMappingFiles();
 var MongooseExpressRoutes = {};

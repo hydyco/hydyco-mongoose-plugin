@@ -5,7 +5,16 @@ import { Router, Request, Response, NextFunction } from "express";
 import { Model, Document } from "mongoose";
 declare type MongooseRequest = Request & {
     methodCall?: string;
+    mquery?: any;
 };
+declare type MongooseModel = Model<Document<any, any>, {}, {}>;
+/**
+ * Function - Make Mongoose Data query using mquery parsed object
+ * @param {Object} query - mquery parsed req object
+ * @param {Object} Model - Mongoose Model
+ * @return {Promise}
+ */
+export declare const HydycoQuery: (query: any, Model: MongooseModel) => import("mongoose").Query<Document<any, any>[], Document<any, any>, {}>;
 /**
  * Class - ExpressRoutes - Auto Generate express routes for mongoose model
  * @param {string} modelName - Name of the Model
@@ -40,7 +49,7 @@ export default class ExpressRoutes {
      * @param {string} - default path string
      * @param {Model} - mongoose model
      */
-    customRoutes(router: Router, defaultPath: string, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Router;
+    customRoutes(router: Router, defaultPath: string, model: MongooseModel, helperModels: Array<MongooseModel>): Router;
     /**
      * Add routes methods
      * @param {IMiddleware} method - Name of the method
@@ -53,44 +62,45 @@ export default class ExpressRoutes {
      * @param {Response} - Express Response object
      * @param {model} - Current Mongoose Model
      */
-    list(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
+    list(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    create(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
+    create(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    read(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
+    read(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
+    /**
+     * Get all mongoose model data
+     * @param {MongooseRequest} - Express MongooseRequest object
+     * @param {Response} - Express Response object
+     *
+     */
+    update(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    update(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
+    delete(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
     /**
      * Get all mongoose model data
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      */
-    delete(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
-    /**
-     * Get all mongoose model data
-     * @param {MongooseRequest} - Express MongooseRequest object
-     * @param {Response} - Express Response object
-     */
-    deleteAll(request: MongooseRequest, response: Response, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): Promise<any>;
+    deleteAll(request: MongooseRequest, response: Response, model: MongooseModel, helperModels: Array<MongooseModel>): Promise<any>;
     /**
      * Gets called before every api call
      * @param {MongooseRequest} - Express MongooseRequest object
      * @param {Response} - Express Response object
      * @return {MongooseRequest,Response} - Return MongooseRequest and Response
      */
-    before(request: MongooseRequest, response: Response, next: NextFunction, model: Model<Document<any, any>, {}, {}>, helperModels: Array<Model<Document<any, any>, {}, {}>>): void;
+    before(request: MongooseRequest, response: Response, next: NextFunction, model: MongooseModel, helperModels: Array<MongooseModel>): void;
     /**
      * Method Call Middleware
      */

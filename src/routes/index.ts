@@ -11,10 +11,13 @@ import {
 } from "express";
 import { Model, Document } from "mongoose";
 import { makeAuth } from "@hydyco/auth";
+const mquery = require("express-mquery"); // ts-types not found
+
 import Parser from "../parser";
 
-type MongooseRequest = Request & { methodCall?: string };
+type MongooseRequest = Request & { methodCall?: string; mquery?: any };
 
+type MongooseModel = Model<Document<any, any>, {}, {}>;
 interface IRestApiPaths {
   list: string;
   create: string;
@@ -54,16 +57,40 @@ enum ERestApiMethods {
 }
 
 /**
+ * Function - Make Mongoose Data query using mquery parsed object
+ * @param {Object} query - mquery parsed req object
+ * @param {Object} Model - Mongoose Model
+ * @return {Promise}
+ */
+export const HydycoQuery = (query: any, Model: MongooseModel) => {
+  if (query) {
+    query = {
+      filter: query.filter || {},
+      paginate: query.paginate || { limit: 10, skip: 0, page: 1 },
+      select: query.select || {},
+      sort: query.sort || {},
+    };
+    return Model.find(query.filter)
+      .select(query.select)
+      .sort(query.sort)
+      .limit(query.paginate.limit)
+      .skip((query.paginate.page - 1) * query.paginate.limit);
+  } else {
+    return Model.find({});
+  }
+};
+
+/**
  * Class - ExpressRoutes - Auto Generate express routes for mongoose model
  * @param {string} modelName - Name of the Model
  * @param {Array[string]} helperModels - Helpers Model list
  */
 
 export default class ExpressRoutes {
-  private _model: Model<Document<any, any>, {}, {}>;
+  private _model: MongooseModel;
   private _router = Router();
   private _defaultPath: string;
-  private _helperModels: Array<Model<Document<any, any>, {}, {}>>;
+  private _helperModels: Array<MongooseModel>;
   private _modelHelper: Parser;
   private _middleware: IMiddleware = {
     list: [],
@@ -126,8 +153,8 @@ export default class ExpressRoutes {
   public customRoutes(
     router: Router,
     defaultPath: string,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Router {
     return router;
   }
@@ -183,10 +210,10 @@ export default class ExpressRoutes {
   public async list(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
-    const res = await model.find({});
+    const res = await HydycoQuery(request.mquery, model);
     this.after(res, request, response);
   }
 
@@ -198,8 +225,8 @@ export default class ExpressRoutes {
   public async create(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
     const { body } = request;
     const res = await model.create(body);
@@ -214,8 +241,8 @@ export default class ExpressRoutes {
   public async read(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
     const { params } = request;
     const { id } = params;
@@ -227,12 +254,13 @@ export default class ExpressRoutes {
    * Get all mongoose model data
    * @param {MongooseRequest} - Express MongooseRequest object
    * @param {Response} - Express Response object
+   *
    */
   public async update(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
     const { body, params } = request;
     const { id } = params;
@@ -248,8 +276,8 @@ export default class ExpressRoutes {
   public async delete(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
     const { params } = request;
     const { id } = params;
@@ -265,8 +293,8 @@ export default class ExpressRoutes {
   public async deleteAll(
     request: MongooseRequest,
     response: Response,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ): Promise<any> {
     const res = await model.remove({});
     this.after(res, request, response);
@@ -282,8 +310,8 @@ export default class ExpressRoutes {
     request: MongooseRequest,
     response: Response,
     next: NextFunction,
-    model: Model<Document<any, any>, {}, {}>,
-    helperModels: Array<Model<Document<any, any>, {}, {}>>
+    model: MongooseModel,
+    helperModels: Array<MongooseModel>
   ) {
     next();
   }
@@ -388,6 +416,9 @@ export default class ExpressRoutes {
         const publicMethods = modelJsonData["publicMethods"];
         if (modelJsonData.status && !publicMethods[method]) {
           this.addMiddleware(method, makeAuth);
+        }
+        if (method === "list") {
+          this.addMiddleware(method, mquery({ limit: 10 }));
         }
         this.addMiddleware(method, [
           (

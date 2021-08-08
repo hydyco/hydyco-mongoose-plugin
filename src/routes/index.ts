@@ -414,7 +414,7 @@ export default class ExpressRoutes {
     ["list", "create", "update", "delete", "read", "deleteAll"].forEach(
       (method: any) => {
         const publicMethods = modelJsonData["publicMethods"];
-        if (modelJsonData.status && !publicMethods[method]) {
+        if (modelJsonData.show && !publicMethods[method]) {
           this.addMiddleware(method, makeAuth);
         }
         if (method === "list") {

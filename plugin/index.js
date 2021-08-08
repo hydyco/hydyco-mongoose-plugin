@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,11 +51,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
         to[j] = from[i];
     return to;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var core_1 = require("@hydyco/core");
-var parser_1 = require("../parser");
-var model_1 = require("../model");
+var mongoose_1 = __importDefault(require("mongoose"));
+var parser_1 = __importDefault(require("../parser"));
+var model_1 = __importDefault(require("../model"));
 var app = express_1.Router();
 var model = new model_1.default();
 var file = new core_1.HydycoFile();
@@ -280,5 +295,36 @@ function crud(request, response) {
         });
     });
 }
-exports.default = app;
+var connectDatabase = function (connectionString, options) {
+    mongoose_1.default.connect(connectionString, __assign({}, options));
+    mongoose_1.default.connection.on("connected", function () {
+        console.log("Mongoose default connection is open ");
+    });
+    mongoose_1.default.connection.on("error", function (err) {
+        console.log("Mongoose default connection has occurred " + err + " error");
+    });
+    mongoose_1.default.connection.on("disconnected", function () {
+        console.log("Mongoose default connection is disconnected");
+    });
+    process.on("SIGINT", function () {
+        mongoose_1.default.connection.close(function () {
+            console.log("Mongoose default connection is disconnected due to application termination");
+            process.exit(0);
+        });
+    });
+};
+/**
+ * Function - Config Mongoose to be used by Hydyco Core
+ * @param {IMongooseConfig} config - Configuration object for mongoose
+ * @return {IRouter} - express router that will be used by Hydyco core
+ */
+var HydycoMongoose = function (_a) {
+    var connectionString = _a.connectionString, _b = _a.options, options = _b === void 0 ? {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    } : _b;
+    connectDatabase(connectionString, options);
+    return app;
+};
+exports.default = HydycoMongoose;
 //# sourceMappingURL=index.js.map

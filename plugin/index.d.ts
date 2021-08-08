@@ -1,5 +1,4 @@
 import { Schema } from "mongoose";
-declare const app: import("express-serve-static-core").Router;
 declare enum EOperations {
     list = "list",
     create = "create",
@@ -25,4 +24,14 @@ export interface ICurdBody {
     operations: EOperations;
     data: ICurdData;
 }
-export default app;
+export interface IMongooseConfig {
+    connectionString: string;
+    options: {};
+}
+/**
+ * Function - Config Mongoose to be used by Hydyco Core
+ * @param {IMongooseConfig} config - Configuration object for mongoose
+ * @return {IRouter} - express router that will be used by Hydyco core
+ */
+declare const HydycoMongoose: ({ connectionString, options, }: IMongooseConfig) => import("express-serve-static-core").Router;
+export default HydycoMongoose;

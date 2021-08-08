@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { HydycoFile, HydycoParser } from "@hydyco/core";
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import Parser from "../parser";
 import Model from "../model";
 
@@ -219,4 +219,53 @@ async function crud(request: Request, response: Response) {
   }
 }
 
-export default app;
+const connectDatabase = (connectionString: string, options: object) => {
+  mongoose.connect(connectionString, {
+    ...options,
+  });
+
+  mongoose.connection.on("connected", function () {
+    console.log("Mongoose default connection is open ");
+  });
+
+  mongoose.connection.on("error", function (err) {
+    console.log("Mongoose default connection has occurred " + err + " error");
+  });
+
+  mongoose.connection.on("disconnected", function () {
+    console.log("Mongoose default connection is disconnected");
+  });
+
+  process.on("SIGINT", function () {
+    mongoose.connection.close(function () {
+      console.log(
+        "Mongoose default connection is disconnected due to application termination"
+      );
+      process.exit(0);
+    });
+  });
+};
+
+export interface IMongooseConfig {
+  connectionString: string;
+  options: {};
+}
+
+/**
+ * Function - Config Mongoose to be used by Hydyco Core
+ * @param {IMongooseConfig} config - Configuration object for mongoose
+ * @return {IRouter} - express router that will be used by Hydyco core
+ */
+
+const HydycoMongoose = ({
+  connectionString,
+  options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+}: IMongooseConfig) => {
+  connectDatabase(connectionString, options);
+  return app;
+};
+
+export default HydycoMongoose;

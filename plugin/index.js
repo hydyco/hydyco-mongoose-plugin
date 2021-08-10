@@ -323,7 +323,8 @@ var HydycoMongoose = function (_a) {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     } : _b;
-    connectDatabase(connectionString, options);
+    if (connectionString)
+        connectDatabase(connectionString, options);
     return app;
 };
 exports.default = HydycoMongoose;

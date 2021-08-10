@@ -264,7 +264,7 @@ const HydycoMongoose = ({
     useUnifiedTopology: true,
   },
 }: IMongooseConfig) => {
-  connectDatabase(connectionString, options);
+  if (connectionString) connectDatabase(connectionString, options);
   return app;
 };
 

@@ -210,6 +210,8 @@ async function crud(request: Request, response: Response) {
         });
         if (or.length) {
           findRef["$or"] = or;
+        } else {
+          searchValues.push("_id");
         }
         const refList = await operationModel.find(findRef).lean();
         return response.json({ list: refList, searchValues });

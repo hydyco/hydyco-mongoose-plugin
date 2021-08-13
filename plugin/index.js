@@ -282,6 +282,9 @@ function crud(request, response) {
                     if (or_1.length) {
                         findRef["$or"] = or_1;
                     }
+                    else {
+                        searchValues_1.push("_id");
+                    }
                     return [4 /*yield*/, operationModel.find(findRef).lean()];
                 case 14:
                     refList = _d.sent();

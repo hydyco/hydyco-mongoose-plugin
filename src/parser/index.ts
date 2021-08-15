@@ -130,40 +130,41 @@ export default class HydycoModel {
 const _sanitizeJsonData = (jsonData: any) => {
   Object.keys(jsonData).forEach((fieldKey) => {
     Object.keys(jsonData[fieldKey]).forEach((fieldDataKey) => {
-      if (
-        typeof jsonData[fieldKey][fieldDataKey] === "boolean" &&
-        jsonData[fieldKey][fieldDataKey] === false
-      ) {
-        delete jsonData[fieldKey][fieldDataKey];
-      }
-      if (
-        typeof jsonData[fieldKey][fieldDataKey] == "string" &&
-        jsonData[fieldKey][fieldDataKey].length === 0
-      ) {
-        delete jsonData[fieldKey][fieldDataKey];
-      }
+      if (fieldDataKey !== "default") {
+        if (
+          typeof jsonData[fieldKey][fieldDataKey] === "boolean" &&
+          jsonData[fieldKey][fieldDataKey] === false
+        ) {
+          delete jsonData[fieldKey][fieldDataKey];
+        }
+        if (
+          typeof jsonData[fieldKey][fieldDataKey] == "string" &&
+          jsonData[fieldKey][fieldDataKey].length === 0
+        ) {
+          delete jsonData[fieldKey][fieldDataKey];
+        }
 
-      if (
-        typeof jsonData[fieldKey][fieldDataKey] == "number" &&
-        jsonData[fieldKey][fieldDataKey] === 0
-      ) {
-        delete jsonData[fieldKey][fieldDataKey];
+        if (
+          typeof jsonData[fieldKey][fieldDataKey] == "number" &&
+          jsonData[fieldKey][fieldDataKey] === 0
+        ) {
+          delete jsonData[fieldKey][fieldDataKey];
+        }
+        if (
+          fieldDataKey === "enum" &&
+          jsonData[fieldKey][fieldDataKey].length === 0
+        ) {
+          delete jsonData[fieldKey][fieldDataKey];
+        }
+        if (
+          fieldDataKey === "ref" &&
+          jsonData[fieldKey][fieldDataKey] === "none"
+        ) {
+          delete jsonData[fieldKey]["relationship"];
+          delete jsonData[fieldKey]["ref"];
+          delete jsonData[fieldKey]["autopopulate"];
+        }
       }
-      if (
-        fieldDataKey === "enum" &&
-        jsonData[fieldKey][fieldDataKey].length === 0
-      ) {
-        delete jsonData[fieldKey][fieldDataKey];
-      }
-      if (
-        fieldDataKey === "ref" &&
-        jsonData[fieldKey][fieldDataKey] === "none"
-      ) {
-        delete jsonData[fieldKey]["relationship"];
-        delete jsonData[fieldKey]["ref"];
-        delete jsonData[fieldKey]["autopopulate"];
-      }
-
       delete jsonData[fieldKey]["name"];
     });
   });

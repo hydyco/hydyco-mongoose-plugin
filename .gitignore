@@ -1,3 +1,11 @@
 node_modules
 
 .hydyco
+
+# build
+index.*
+
+model
+parser
+plugin
+routes

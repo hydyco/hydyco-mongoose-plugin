@@ -1,5 +1,6 @@
 import { HydycoFile } from "@hydyco/core";
 import * as mongoose from "mongoose";
+import { camelCase } from "camel-case";
 
 export default class Model {
   private _file: HydycoFile = new HydycoFile();
@@ -11,7 +12,7 @@ export default class Model {
    *
    */
   createModel(modelName: string, jsonData: {}) {
-    modelName = modelName.toLowerCase();
+    modelName = this._file.getFileName(modelName);
     this._file.writeMappingFile(modelName, jsonData);
     if (mongoose.models[modelName]) delete mongoose.models[modelName];
   }
@@ -29,7 +30,7 @@ export default class Model {
    * @param {string} modelName
    */
   deleteModel(modelName: string) {
-    modelName = modelName.toLowerCase();
+    modelName = this._file.getFileName(modelName);
     this._file.deleteMappingFile(modelName);
     if (mongoose.models[modelName]) delete mongoose.models[modelName];
   }

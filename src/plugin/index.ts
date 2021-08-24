@@ -1,8 +1,12 @@
 import { Router, Request, Response } from "express";
 import { HydycoFile, HydycoParser } from "@hydyco/core";
 import mongoose, { Schema } from "mongoose";
+const mquery = require("express-mquery"); // ts-types not found
+
 import Parser from "../parser";
 import Model from "../model";
+import { HydycoQuery } from "..";
+
 
 const app = Router();
 const model = new Model();
@@ -10,6 +14,7 @@ const file = new HydycoFile();
 const parser = new HydycoParser();
 
 enum EOperations {
+  read = "read",
   list = "list",
   create = "create",
   update = "update",
@@ -130,8 +135,8 @@ async function deleteModelRoute(request: Request, response: Response) {
  * @path /model/crud/
  * @method POST
  */
-app.post("/model/crud", crud);
-async function crud(request: Request, response: Response) {
+app.post("/model/crud", mquery({ limit: 10 }), crud);
+async function crud(request: Request & { mquery?: any }, response: Response) {
   const body: ICurdBody = request.body;
   const Model = new Parser(parser.getModelName(body.model));
   const operationModel = Model.mongooseModel();
@@ -140,16 +145,19 @@ async function crud(request: Request, response: Response) {
 
   try {
     switch (body.operations) {
+      case EOperations.read:
+        try {
+          const data = await operationModel.findById(body.data.id).lean();
+          return response.end(JSON.stringify({ ...data }));
+        } catch (error) {
+          console.log(error);
+          return response.end(JSON.stringify({}));
+        }
       case EOperations.list:
-        const current = body.data.query.pagination?.current || 1;
-        const pageSize = body.data.query.pagination?.pageSize || 10;
-        const find = body.data.query.find || {};
+        const current = request.mquery?.paginate.page || 1;
+        const pageSize = request.mquery?.paginate.limit || 10;
 
-        const list = await operationModel
-          .find(find)
-          .skip((current - 1) * pageSize)
-          .limit(pageSize)
-          .lean();
+        const list = await HydycoQuery(request.mquery, operationModel);
 
         const column = Object.keys(operationSchema).map((key) => ({
           name: key,
@@ -161,7 +169,7 @@ async function crud(request: Request, response: Response) {
           file: operationSchema[key].ref === "File",
         }));
         const total = await operationModel.count();
-        const expectedResult = current * pageSize;
+
         return response.end(
           JSON.stringify({
             list,

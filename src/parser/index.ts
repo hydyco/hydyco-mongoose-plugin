@@ -69,7 +69,43 @@ export default class HydycoModel {
    */
   private _getSchemaParseData() {
     let jsonData: any = this._getSchemaJson();
-    jsonData = _sanitizeJsonData(jsonData);
+    jsonData = _sanitizeJsonData({
+      ...jsonData,
+      createdAt: {
+        name: "createdAt",
+        type: "date",
+        default: "",
+        index: false,
+        maxLength: 0,
+        minLength: 0,
+        required: false,
+        trim: false,
+        unique: false,
+        uppercase: false,
+        lowercase: false,
+        ref: "none",
+        relationship: "hasmany",
+        enum: [],
+        autopopulate: true,
+      },
+      updatedAt: {
+        name: "updatedAt",
+        type: "date",
+        default: "",
+        index: false,
+        maxLength: 0,
+        minLength: 0,
+        required: false,
+        trim: false,
+        unique: false,
+        uppercase: false,
+        lowercase: false,
+        ref: "none",
+        relationship: "hasmany",
+        enum: [],
+        autopopulate: true,
+      },
+    });
     jsonData = _parseTypeData(jsonData);
     return jsonData;
   }
@@ -79,7 +115,7 @@ export default class HydycoModel {
    */
   private _getMongooseSchema(): Schema {
     const jsonData = this._getSchemaParseData();
-    const schema = new Schema(jsonData);
+    const schema = new Schema(jsonData, { timestamps: true });
     schema.plugin((schema) => {
       const populates = Object.keys(schema.obj).filter(
         (key: any) => schema.obj[key].autopopulate

@@ -168,7 +168,7 @@ async function crud(request: Request & { mquery?: any }, response: Response) {
             : operationSchema[key].type.schemaName.toLowerCase(),
           file: operationSchema[key].ref === "File",
         }));
-        const total = await operationModel.count();
+        const total = await operationModel.find(request.mquery.filter).count();
 
         return response.end(
           JSON.stringify({

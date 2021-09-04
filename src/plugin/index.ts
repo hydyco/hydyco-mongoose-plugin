@@ -1,17 +1,15 @@
 import { Router, Request, Response } from "express";
-import { HydycoFile, HydycoParser } from "@hydyco/core";
 import mongoose, { Schema } from "mongoose";
+import Parser from "../model";
+import { getMappingList, createMapping, deleteMapping } from "../mapping";
+import { readAllMappingFiles } from "@hydyco/core/main/file";
+import { getModelName } from "@hydyco/core/main/parser";
+import { IConfig } from "@hydyco/core/types/config";
+import chalk from "chalk";
+
 const mquery = require("express-mquery"); // ts-types not found
 
-import Parser from "../parser";
-import Model from "../model";
-import { HydycoQuery } from "..";
-
-
 const app = Router();
-const model = new Model();
-const file = new HydycoFile();
-const parser = new HydycoParser();
 
 enum EOperations {
   read = "read",
@@ -43,6 +41,30 @@ export interface ICurdBody {
 }
 
 /**
+ * Function - Make Mongoose Data query using mquery parsed object
+ * @param {Object} query - mquery parsed req object
+ * @param {Object} Model - Mongoose Model
+ * @return {Promise}
+ */
+export const HydycoQuery = (query: any, Model: any) => {
+  if (query) {
+    query = {
+      filter: query.filter || {},
+      paginate: query.paginate || { limit: 10, skip: 0, page: 1 },
+      select: query.select || {},
+      sort: query.sort || {},
+    };
+    return Model.find(query.filter)
+      .select(query.select)
+      .sort(query.sort)
+      .limit(query.paginate.limit)
+      .skip((query.paginate.page - 1) * query.paginate.limit);
+  } else {
+    return Model.find({});
+  }
+};
+
+/**
  * Get list of all registered mongoose models
  * @param {Request} request
  * @param {Response} response
@@ -51,7 +73,7 @@ export interface ICurdBody {
  */
 app.get("/model/list", listModelsRoute);
 async function listModelsRoute(request: Request, response: Response) {
-  const models = model.getModelList();
+  const models = getMappingList();
   models.sort();
   return response.json(models);
 }
@@ -91,8 +113,8 @@ async function createModelRoute(request: Request, response: Response) {
   const body = request.body;
   try {
     if (modelName) {
-      model.createModel(modelName, body);
-      file.readAllMappingFiles(true).forEach((file: any) => {
+      createMapping(modelName, body);
+      readAllMappingFiles(true).forEach((file: any) => {
         new Parser(file).updateMongooseModel();
       });
       return response.json(body);
@@ -115,8 +137,8 @@ async function deleteModelRoute(request: Request, response: Response) {
   const modelName = request.params?.modelName;
   if (modelName) {
     try {
-      model.deleteModel(modelName);
-      file.readAllMappingFiles(true).forEach((file: any) => {
+      deleteMapping(modelName);
+      readAllMappingFiles(true).forEach((file: any) => {
         new Parser(file).updateMongooseModel();
       });
       return response.json({ status: true, message: "Collection Deleted" });
@@ -138,10 +160,10 @@ async function deleteModelRoute(request: Request, response: Response) {
 app.post("/model/crud", mquery({ limit: 10 }), crud);
 async function crud(request: Request & { mquery?: any }, response: Response) {
   const body: ICurdBody = request.body;
-  const Model = new Parser(parser.getModelName(body.model));
-  const operationModel = Model.mongooseModel();
-  const operationSchema = Model.parsedSchema();
-  const operationRaw: any = Model.rawSchema();
+  const Model = new Parser(getModelName(body.model));
+  const operationModel = Model.Model();
+  const operationSchema = Model.schemaParsed();
+  const operationRaw: any = Model.schemaJson();
 
   try {
     switch (body.operations) {
@@ -235,21 +257,23 @@ const connectDatabase = (connectionString: string, options: object) => {
   });
 
   mongoose.connection.on("connected", function () {
-    console.log("Mongoose default connection is open ");
+    console.log(chalk.greenBright("Database connected"));
   });
 
   mongoose.connection.on("error", function (err) {
-    console.log("Mongoose default connection has occurred " + err + " error");
+    console.log(chalk.redBright("Database has  " + err + " error"));
   });
 
   mongoose.connection.on("disconnected", function () {
-    console.log("Mongoose default connection is disconnected");
+    console.log(chalk.cyanBright("Database disconnected"));
   });
 
   process.on("SIGINT", function () {
     mongoose.connection.close(function () {
       console.log(
-        "Mongoose default connection is disconnected due to application termination"
+        chalk.red(
+          "Database connection is disconnected due to application termination"
+        )
       );
       process.exit(0);
     });
@@ -267,15 +291,19 @@ export interface IMongooseConfig {
  * @return {IRouter} - express router that will be used by Hydyco core
  */
 
-const HydycoMongoose = ({
-  connectionString,
-  options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-}: IMongooseConfig) => {
-  if (connectionString) connectDatabase(connectionString, options);
+const MongoosePlugin = ({
+  config,
+  kernel,
+}: {
+  config: IConfig;
+  kernel: any;
+}) => {
+  if (kernel.database.config.connectionString)
+    connectDatabase(
+      kernel.database.config.connectionString,
+      kernel.database.config.options
+    );
   return app;
 };
 
-export default HydycoMongoose;
+export default MongoosePlugin;

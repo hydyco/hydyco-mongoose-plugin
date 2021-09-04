@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src", "src/index.ts"],
   "exclude": [
     "node_modules",
     "./node_modules",
@@ -11,10 +11,10 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./",
-    "strict": true,
     "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "noImplicitUseStrict": true,
     "resolveJsonModule": true
   }
 }

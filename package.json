@@ -1,6 +1,6 @@
 {
   "name": "@hydyco/mongoose-plugin",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Mongoose Plugin for Hydyco",
   "main": "index.js",
   "scripts": {
